@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { CurrencyManagement } from "@/components/settings/CurrencyManagement";
+import { useCurrencyManager } from "@/components/settings/hooks/useCurrencyManager";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Settings, 
   Bell, 
@@ -50,6 +52,7 @@ interface GeneralSettings {
 }
 
 export default function SettingsPage() {
+  const { toast } = useToast();
   const [notifications, setNotifications] = useState<NotificationSettings>({
     email: true,
     push: true,
@@ -69,6 +72,14 @@ export default function SettingsPage() {
     numberFormat: "1 234,56"
   });
 
+  const { 
+    currencies, 
+    newCurrency, 
+    setNewCurrency, 
+    addCurrency, 
+    removeCurrency 
+  } = useCurrencyManager();
+
   // Nouveaux états pour les devises d'affichage
   const [primaryCurrency, setPrimaryCurrency] = useState("XOF");
   const [secondaryCurrency, setSecondaryCurrency] = useState("MAD");
@@ -79,6 +90,13 @@ export default function SettingsPage() {
 
   const updateGeneralSetting = (key: keyof GeneralSettings, value: string) => {
     setGeneralSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleSave = () => {
+    toast({
+      title: "Paramètres sauvegardés",
+      description: "Vos modifications ont été enregistrées avec succès.",
+    });
   };
 
   return (
@@ -94,7 +112,7 @@ export default function SettingsPage() {
             <Download className="w-4 h-4 mr-2" />
             Exporter config
           </Button>
-          <Button>
+          <Button onClick={handleSave}>
             <Upload className="w-4 h-4 mr-2" />
             Sauvegarder
           </Button>
@@ -160,10 +178,11 @@ export default function SettingsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="EUR">Euro (EUR)</SelectItem>
-                      <SelectItem value="USD">Dollar US (USD)</SelectItem>
-                      <SelectItem value="GBP">Livre Sterling (GBP)</SelectItem>
-                      <SelectItem value="CAD">Dollar Canadien (CAD)</SelectItem>
+                      {currencies.map((currency) => (
+                        <SelectItem key={currency.code} value={currency.code}>
+                          {currency.name} ({currency.code})
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -255,6 +274,11 @@ export default function SettingsPage() {
             secondaryCurrency={secondaryCurrency}
             onPrimaryCurrencyChange={setPrimaryCurrency}
             onSecondaryCurrencyChange={setSecondaryCurrency}
+            currencies={currencies}
+            newCurrency={newCurrency}
+            setNewCurrency={setNewCurrency}
+            addCurrency={addCurrency}
+            removeCurrency={removeCurrency}
           />
         </TabsContent>
 

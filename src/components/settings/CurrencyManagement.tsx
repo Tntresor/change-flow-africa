@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,29 +6,18 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Globe } from "lucide-react";
-
-interface Currency {
-  code: string;
-  name: string;
-  symbol: string;
-  isDefault: boolean;
-}
-
-const defaultCurrencies: Currency[] = [
-  { code: "EUR", name: "Euro", symbol: "€", isDefault: true },
-  { code: "USD", name: "Dollar US", symbol: "$", isDefault: true },
-  { code: "XOF", name: "Franc CFA", symbol: "F CFA", isDefault: true },
-  { code: "MAD", name: "Dirham Marocain", symbol: "DH", isDefault: true },
-  { code: "AED", name: "Dirham des Émirats", symbol: "د.إ", isDefault: true },
-  { code: "GBP", name: "Livre Sterling", symbol: "£", isDefault: false },
-  { code: "CAD", name: "Dollar Canadien", symbol: "C$", isDefault: false },
-];
+import { Currency } from "./hooks/useCurrencyManager";
 
 interface CurrencyManagementProps {
   primaryCurrency: string;
   secondaryCurrency: string;
   onPrimaryCurrencyChange: (currency: string) => void;
   onSecondaryCurrencyChange: (currency: string) => void;
+  currencies: Currency[];
+  newCurrency: { code: string; name: string; symbol: string; };
+  setNewCurrency: (currency: { code: string; name: string; symbol: string; }) => void;
+  addCurrency: () => void;
+  removeCurrency: (code: string) => void;
 }
 
 export function CurrencyManagement({
@@ -37,26 +25,12 @@ export function CurrencyManagement({
   secondaryCurrency,
   onPrimaryCurrencyChange,
   onSecondaryCurrencyChange,
+  currencies,
+  newCurrency,
+  setNewCurrency,
+  addCurrency,
+  removeCurrency,
 }: CurrencyManagementProps) {
-  const [currencies, setCurrencies] = useState<Currency[]>(defaultCurrencies);
-  const [newCurrency, setNewCurrency] = useState({ code: "", name: "", symbol: "" });
-
-  const addCurrency = () => {
-    if (newCurrency.code && newCurrency.name && newCurrency.symbol) {
-      const currency: Currency = {
-        ...newCurrency,
-        code: newCurrency.code.toUpperCase(),
-        isDefault: false,
-      };
-      setCurrencies([...currencies, currency]);
-      setNewCurrency({ code: "", name: "", symbol: "" });
-    }
-  };
-
-  const removeCurrency = (code: string) => {
-    setCurrencies(currencies.filter(c => c.code !== code || c.isDefault));
-  };
-
   return (
     <div className="space-y-6">
       <Card>
