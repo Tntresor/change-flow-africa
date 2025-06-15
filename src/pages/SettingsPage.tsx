@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,8 @@ import {
   CreditCard,
   AlertTriangle,
   CheckCircle,
-  Info
+  Info,
+  Save
 } from "lucide-react";
 
 interface NotificationSettings {
@@ -113,7 +115,7 @@ export default function SettingsPage() {
             Exporter config
           </Button>
           <Button onClick={handleSave}>
-            <Upload className="w-4 h-4 mr-2" />
+            <Save className="w-4 h-4 mr-2" />
             Sauvegarder
           </Button>
         </div>
