@@ -46,6 +46,7 @@ export interface TransactionLocation {
 }
 
 export interface CustomerInfo {
+  id?: string;
   name: string;
   phone?: string;
   email?: string;

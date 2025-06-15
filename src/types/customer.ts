@@ -7,4 +7,5 @@ export interface Customer extends CustomerInfo {
     id: string; // can be phone number or a generated UUID
     kycStatus: KycStatus;
     lastTransactionDate: Date;
+    riskScore: number;
 }
