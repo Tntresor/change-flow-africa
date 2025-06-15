@@ -2,8 +2,20 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Bell, Plus, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function Header() {
+  const navigate = useNavigate();
+
+  const handleNewTransaction = () => {
+    navigate('/transactions');
+    // On pourrait aussi déclencher directement l'ouverture du formulaire de nouvelle transaction
+  };
+
+  const handleSettings = () => {
+    navigate('/settings');
+  };
+
   return (
     <header className="border-b border-gray-200 bg-white px-6 py-4">
       <div className="flex items-center justify-between">
@@ -20,11 +32,19 @@ export function Header() {
             <Bell className="w-4 h-4" />
             <span className="hidden sm:inline">Notifications</span>
           </Button>
-          <Button size="sm" className="gap-2 bg-blue-600 hover:bg-blue-700">
+          <Button 
+            size="sm" 
+            className="gap-2 bg-blue-600 hover:bg-blue-700"
+            onClick={handleNewTransaction}
+          >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Nouvelle transaction</span>
           </Button>
-          <Button variant="ghost" size="sm">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleSettings}
+          >
             <Settings className="w-4 h-4" />
           </Button>
         </div>
