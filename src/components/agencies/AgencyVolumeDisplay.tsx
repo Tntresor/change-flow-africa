@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Building } from "lucide-react";
@@ -21,8 +20,8 @@ const mockExchangeRates = {
   XOF: { EUR: 655.957, USD: 600.0, MAD: 60.0, AED: 2205.0 },
   MAD: { EUR: 10.85, USD: 10.0, XOF: 0.0167, AED: 36.75 },
   AED: { EUR: 0.295, USD: 0.272, XOF: 0.00045, MAD: 0.027 },
-  EUR: { XOF: 655.957, MAD: 10.85, AED: 4.02 },
-  USD: { XOF: 600.0, MAD: 10.0, AED: 3.67 },
+  EUR: { XOF: 655.957, MAD: 10.85, AED: 4.02, USD: 1.0850 },
+  USD: { XOF: 600.0, MAD: 10.0, AED: 3.67, EUR: 0.9200 },
 };
 
 export function AgencyVolumeDisplay({ 
@@ -34,18 +33,39 @@ export function AgencyVolumeDisplay({
   const convertCurrency = (amount: number, fromCurrency: string, toCurrency: string): number => {
     if (fromCurrency === toCurrency) return amount;
     
-    // Conversion simple via EUR comme devise de base
-    if (fromCurrency === "EUR") {
-      return amount * (mockExchangeRates[toCurrency as keyof typeof mockExchangeRates]?.EUR || 1);
+    const fromRates = mockExchangeRates[fromCurrency as keyof typeof mockExchangeRates];
+    if (!fromRates) return amount;
+    
+    // Direct conversion if available
+    const directRate = fromRates[toCurrency as keyof typeof fromRates];
+    if (directRate) {
+      return amount * directRate;
     }
     
-    if (toCurrency === "EUR") {
-      return amount / (mockExchangeRates[fromCurrency as keyof typeof mockExchangeRates]?.EUR || 1);
+    // Try conversion via EUR if both currencies have EUR rates
+    const fromEurRate = fromRates['EUR'];
+    const toRates = mockExchangeRates[toCurrency as keyof typeof mockExchangeRates];
+    const toEurRate = toRates?.['EUR'];
+    
+    if (fromEurRate && toEurRate) {
+      // Convert from -> EUR -> to
+      const amountInEur = amount * fromEurRate;
+      return amountInEur / toEurRate;
     }
     
-    // Conversion via EUR
-    const amountInEur = amount / (mockExchangeRates[fromCurrency as keyof typeof mockExchangeRates]?.EUR || 1);
-    return amountInEur * (mockExchangeRates[toCurrency as keyof typeof mockExchangeRates]?.EUR || 1);
+    // Try conversion via USD if both currencies have USD rates
+    const fromUsdRate = fromRates['USD'];
+    const toUsdRate = toRates?.['USD'];
+    
+    if (fromUsdRate && toUsdRate) {
+      // Convert from -> USD -> to
+      const amountInUsd = amount * fromUsdRate;
+      return amountInUsd / toUsdRate;
+    }
+    
+    // If no conversion path found, return original amount
+    console.warn(`No conversion path found from ${fromCurrency} to ${toCurrency}`);
+    return amount;
   };
 
   const formatCurrency = (amount: number, currency: string): string => {
