@@ -13,6 +13,7 @@ interface FeesSectionProps {
   onCancel: () => void;
   onToggleActive: (id: string) => void;
   onFormChange: (form: Partial<FeeSettings>) => void;
+  onDelete: (id: string) => void;
 }
 
 export function FeesSection({
@@ -24,6 +25,7 @@ export function FeesSection({
   onCancel,
   onToggleActive,
   onFormChange,
+  onDelete,
 }: FeesSectionProps) {
   return (
     <Card>
@@ -46,6 +48,7 @@ export function FeesSection({
               onCancel={onCancel}
               onToggleActive={onToggleActive}
               onFormChange={onFormChange}
+              onDelete={onDelete}
             />
           ))}
         </div>

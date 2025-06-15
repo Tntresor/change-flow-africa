@@ -30,6 +30,10 @@ export function useFeesManager() {
     setEditFeeForm({});
   };
 
+  const handleDeleteFee = (id: string) => {
+    setFees(fees.filter(fee => fee.id !== id));
+  };
+
   const toggleFeeActive = (id: string) => {
     setFees(fees.map(fee => 
       fee.id === id ? { ...fee, isActive: !fee.isActive } : fee
@@ -44,6 +48,7 @@ export function useFeesManager() {
     handleEditFee,
     handleSaveFee,
     handleCancelFeeEdit,
+    handleDeleteFee,
     toggleFeeActive,
   };
 }
