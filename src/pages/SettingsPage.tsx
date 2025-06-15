@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -53,25 +52,43 @@ interface GeneralSettings {
   numberFormat: string;
 }
 
+const defaultNotificationSettings: NotificationSettings = {
+  email: true,
+  push: true,
+  sms: false,
+  newTransaction: true,
+  dailyReport: true,
+  weeklyReport: true,
+  securityAlerts: true
+};
+
+const defaultGeneralSettings: GeneralSettings = {
+  companyName: "ExchangeHub",
+  defaultCurrency: "EUR",
+  timezone: "Europe/Paris",
+  language: "fr",
+  dateFormat: "DD/MM/YYYY",
+  numberFormat: "1 234,56"
+};
+
 export default function SettingsPage() {
   const { toast } = useToast();
-  const [notifications, setNotifications] = useState<NotificationSettings>({
-    email: true,
-    push: true,
-    sms: false,
-    newTransaction: true,
-    dailyReport: true,
-    weeklyReport: true,
-    securityAlerts: true
+  const [notifications, setNotifications] = useState<NotificationSettings>(() => {
+    try {
+      const saved = localStorage.getItem("exchangehub-notifications");
+      return saved ? JSON.parse(saved) : defaultNotificationSettings;
+    } catch {
+      return defaultNotificationSettings;
+    }
   });
 
-  const [generalSettings, setGeneralSettings] = useState<GeneralSettings>({
-    companyName: "ExchangeHub",
-    defaultCurrency: "EUR",
-    timezone: "Europe/Paris",
-    language: "fr",
-    dateFormat: "DD/MM/YYYY",
-    numberFormat: "1 234,56"
+  const [generalSettings, setGeneralSettings] = useState<GeneralSettings>(() => {
+    try {
+      const saved = localStorage.getItem("exchangehub-general-settings");
+      return saved ? JSON.parse(saved) : defaultGeneralSettings;
+    } catch {
+      return defaultGeneralSettings;
+    }
   });
 
   const { 
@@ -83,8 +100,12 @@ export default function SettingsPage() {
   } = useCurrencyManager();
 
   // Nouveaux états pour les devises d'affichage
-  const [primaryCurrency, setPrimaryCurrency] = useState("XOF");
-  const [secondaryCurrency, setSecondaryCurrency] = useState("MAD");
+  const [primaryCurrency, setPrimaryCurrency] = useState<string>(() => {
+    return localStorage.getItem("exchangehub-primary-currency") || "XOF";
+  });
+  const [secondaryCurrency, setSecondaryCurrency] = useState<string>(() => {
+    return localStorage.getItem("exchangehub-secondary-currency") || "MAD";
+  });
 
   const updateNotification = (key: keyof NotificationSettings, value: boolean) => {
     setNotifications(prev => ({ ...prev, [key]: value }));
@@ -95,10 +116,24 @@ export default function SettingsPage() {
   };
 
   const handleSave = () => {
-    toast({
-      title: "Paramètres sauvegardés",
-      description: "Vos modifications ont été enregistrées avec succès.",
-    });
+    try {
+      localStorage.setItem("exchangehub-general-settings", JSON.stringify(generalSettings));
+      localStorage.setItem("exchangehub-notifications", JSON.stringify(notifications));
+      localStorage.setItem("exchangehub-primary-currency", primaryCurrency);
+      localStorage.setItem("exchangehub-secondary-currency", secondaryCurrency);
+      
+      toast({
+        title: "Paramètres sauvegardés",
+        description: "Vos modifications ont été enregistrées avec succès.",
+      });
+    } catch (error) {
+      console.error("Failed to save settings to localStorage", error);
+      toast({
+        title: "Erreur de sauvegarde",
+        description: "Impossible d'enregistrer les paramètres.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (

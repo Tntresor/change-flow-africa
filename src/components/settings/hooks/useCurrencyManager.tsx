@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export interface Currency {
   code: string;
@@ -19,8 +19,24 @@ const defaultCurrencies: Currency[] = [
 ];
 
 export function useCurrencyManager() {
-  const [currencies, setCurrencies] = useState<Currency[]>(defaultCurrencies);
+  const [currencies, setCurrencies] = useState<Currency[]>(() => {
+    try {
+      const storedCurrencies = localStorage.getItem("exchangehub-currencies");
+      return storedCurrencies ? JSON.parse(storedCurrencies) : defaultCurrencies;
+    } catch (error) {
+      console.error("Error loading currencies from localStorage", error);
+      return defaultCurrencies;
+    }
+  });
   const [newCurrency, setNewCurrency] = useState({ code: "", name: "", symbol: "" });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("exchangehub-currencies", JSON.stringify(currencies));
+    } catch (error) {
+      console.error("Error saving currencies to localStorage", error);
+    }
+  }, [currencies]);
 
   const addCurrency = () => {
     if (newCurrency.code && newCurrency.name && newCurrency.symbol) {
