@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -7,11 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { TransactionFilters, FilterState } from "@/components/transactions/TransactionFilters";
 import { TransactionTable } from "@/components/transactions/TransactionTable";
 import { TransactionCard } from "@/components/transactions/TransactionCard";
+import { AddTransactionForm } from "@/components/transactions/AddTransactionForm";
 import { Transaction } from "@/types/transaction";
 import { mockTransactions } from "@/data/mockData";
 import { Plus, Download, Upload, WifiOff, Clock, AlertTriangle } from "lucide-react";
 
 export default function TransactionsPage() {
+  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
   const [filters, setFilters] = useState<FilterState>({
     search: "",
     status: "all",
@@ -21,9 +22,10 @@ export default function TransactionsPage() {
   });
 
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const filteredTransactions = useMemo(() => {
-    return mockTransactions.filter((transaction) => {
+    return transactions.filter((transaction) => {
       // Filtre de recherche
       if (filters.search) {
         const searchTerm = filters.search.toLowerCase();
@@ -70,11 +72,11 @@ export default function TransactionsPage() {
 
       return true;
     });
-  }, [filters]);
+  }, [filters, transactions]);
 
   // Transactions qui nécessitent une attention particulière
-  const offlineTransactions = mockTransactions.filter(t => t.status === 'offline' || t.isOffline);
-  const pendingTransactions = mockTransactions.filter(t => t.status === 'pending');
+  const offlineTransactions = transactions.filter(t => t.status === 'offline' || t.isOffline);
+  const pendingTransactions = transactions.filter(t => t.status === 'pending');
   const criticalTransactions = [...offlineTransactions, ...pendingTransactions];
 
   const handleViewTransaction = (transaction: Transaction) => {
@@ -83,6 +85,11 @@ export default function TransactionsPage() {
 
   const handleCloseDialog = () => {
     setSelectedTransaction(null);
+  };
+
+  const handleAddTransaction = (newTransaction: Transaction) => {
+    setTransactions([newTransaction, ...transactions]);
+    setShowAddForm(false);
   };
 
   return (
@@ -107,7 +114,10 @@ export default function TransactionsPage() {
             <Upload className="w-4 h-4" />
             Importer
           </Button>
-          <Button className="gap-2 bg-blue-600 hover:bg-blue-700">
+          <Button 
+            onClick={() => setShowAddForm(true)}
+            className="gap-2 bg-blue-600 hover:bg-blue-700"
+          >
             <Plus className="w-4 h-4" />
             Nouvelle transaction
           </Button>
@@ -238,6 +248,16 @@ export default function TransactionsPage() {
               <TransactionCard transaction={selectedTransaction} />
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de création de transaction */}
+      <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <AddTransactionForm
+            onSuccess={handleAddTransaction}
+            onCancel={() => setShowAddForm(false)}
+          />
         </DialogContent>
       </Dialog>
     </div>
