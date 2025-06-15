@@ -225,7 +225,7 @@ export function AgencyDetailView({ agency }: AgencyDetailViewProps) {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(liquidityByurrency).map(([currency, ops]) => (
+                {Object.entries(liquidityByCurrency).map(([currency, ops]: [string, { cashIn: number; cashOut: number; net: number }]) => (
                   <Card key={currency}>
                     <CardHeader>
                       <CardTitle className="text-lg">{currency}</CardTitle>
