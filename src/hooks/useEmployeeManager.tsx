@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Employee } from "@/types/liquidity";
+import { mockAgencies } from "@/data/mockData";
 
 const mockEmployees: Employee[] = [
   {
@@ -10,7 +11,7 @@ const mockEmployees: Employee[] = [
     email: "marie.dubois@exchangehub.com",
     phone: "+33 1 23 45 67 89",
     agencyId: "1",
-    agencyName: "Agence Paris Centre",
+    agencyName: "Agence Paris",
     role: "manager",
     isActive: true,
     permissions: [
@@ -30,7 +31,7 @@ const mockEmployees: Employee[] = [
     email: "pierre.martin@exchangehub.com",
     phone: "+33 1 23 45 67 90",
     agencyId: "1",
-    agencyName: "Agence Paris Centre",
+    agencyName: "Agence Paris",
     role: "cashier",
     isActive: true,
     permissions: [
@@ -44,12 +45,111 @@ const mockEmployees: Employee[] = [
   },
   {
     id: "emp_3",
-    firstName: "Sophie",
-    lastName: "Bernard",
-    email: "sophie.bernard@exchangehub.com",
-    phone: "+33 4 56 78 90 12",
+    firstName: "Fatou",
+    lastName: "Diop",
+    email: "fatou.diop@exchangehub.com",
+    phone: "+237 671 234 567",
     agencyId: "2",
-    agencyName: "Agence Lyon",
+    agencyName: "Agence Douala",
+    role: "manager",
+    isActive: true,
+    permissions: [
+      { action: "create_transaction", granted: true },
+      { action: "approve_transaction", granted: true },
+      { action: "manage_liquidity", granted: true },
+      { action: "view_reports", granted: true },
+      { action: "manage_employees", granted: true }
+    ],
+    hireDate: new Date("2021-03-10"),
+    lastLogin: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: "emp_4",
+    firstName: "Ahmed",
+    lastName: "El Fassi",
+    email: "ahmed.elfassi@exchangehub.com",
+    phone: "+212 522 123 456",
+    agencyId: "3",
+    agencyName: "Agence Casablanca",
+    role: "manager",
+    isActive: true,
+    permissions: [
+      { action: "create_transaction", granted: true },
+      { action: "approve_transaction", granted: true },
+      { action: "manage_liquidity", granted: true },
+      { action: "view_reports", granted: true },
+      { action: "manage_employees", granted: true }
+    ],
+    hireDate: new Date("2019-09-01"),
+    lastLogin: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: "emp_5",
+    firstName: "Grace",
+    lastName: "Uwimana",
+    email: "grace.uwimana@exchangehub.com",
+    phone: "+250 788 123 456",
+    agencyId: "4",
+    agencyName: "Agence Kigali",
+    role: "manager",
+    isActive: true,
+    permissions: [
+      { action: "create_transaction", granted: true },
+      { action: "approve_transaction", granted: true },
+      { action: "manage_liquidity", granted: true },
+      { action: "view_reports", granted: true },
+      { action: "manage_employees", granted: true }
+    ],
+    hireDate: new Date("2020-07-15"),
+    lastLogin: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: "emp_6",
+    firstName: "Omar",
+    lastName: "Al Maktoum",
+    email: "omar.almaktoum@exchangehub.com",
+    phone: "+971 50 123 4567",
+    agencyId: "5",
+    agencyName: "Agence Dubai",
+    role: "manager",
+    isActive: true,
+    permissions: [
+      { action: "create_transaction", granted: true },
+      { action: "approve_transaction", granted: true },
+      { action: "manage_liquidity", granted: true },
+      { action: "view_reports", granted: true },
+      { action: "manage_employees", granted: true }
+    ],
+    hireDate: new Date("2021-11-01"),
+    lastLogin: new Date()
+  },
+  {
+    id: "emp_7",
+    firstName: "Aminata",
+    lastName: "Sow",
+    email: "aminata.sow@exchangehub.com",
+    phone: "+237 677 558 765",
+    agencyId: "2",
+    agencyName: "Agence Douala",
+    role: "cashier",
+    isActive: true,
+    permissions: [
+      { action: "create_transaction", granted: true },
+      { action: "approve_transaction", granted: false },
+      { action: "manage_liquidity", granted: false },
+      { action: "view_reports", granted: true },
+      { action: "manage_employees", granted: false }
+    ],
+    hireDate: new Date("2022-05-15")
+  },
+  {
+    id: "emp_8",
+    firstName: "Layla",
+    lastName: "Hassan",
+    email: "layla.hassan@exchangehub.com",
+    phone: "+971 502 345 678",
+    agencyId: "5",
+    agencyName: "Agence Dubai",
     role: "agent",
     isActive: true,
     permissions: [
@@ -59,7 +159,7 @@ const mockEmployees: Employee[] = [
       { action: "view_reports", granted: false },
       { action: "manage_employees", granted: false }
     ],
-    hireDate: new Date("2022-03-10")
+    hireDate: new Date("2023-01-10")
   }
 ];
 

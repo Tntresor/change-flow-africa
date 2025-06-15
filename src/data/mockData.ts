@@ -3,7 +3,7 @@ import { Transaction, Agency, Partner, TransactionType, CommissionTier } from "@
 import { Customer } from "@/types/customer";
 import { v4 as uuidv4 } from 'uuid';
 
-// Updated agencies with the specified branches
+// Agences cohérentes avec les données de liquidité
 export const mockAgencies: Agency[] = [
   { id: "1", name: "Agence Paris", code: "PAR01", country: "France", isActive: true },
   { id: "2", name: "Agence Douala", code: "DLA01", country: "Cameroun", isActive: true },
@@ -28,36 +28,80 @@ export const mockCommissionTiers: CommissionTier[] = [
   { id: "t4", name: "Palier 4", minAmount: 1000, fixedAmount: 15, percentage: 0.8 },
 ];
 
-// Coherent set of customers with proper distribution across countries
+// Clients cohérents avec répartition par pays
 export const mockCustomers: Customer[] = [
   // Paris customers
   { id: `cust_${uuidv4()}`, name: 'Jean Dupont', phone: '+33612345678', email: 'jean.dupont@email.com', address: '1 rue de la Paix, Paris', idNumber: '123456789', kycStatus: 'verified', riskScore: 10, lastTransactionDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
   { id: `cust_${uuidv4()}`, name: 'Marie Martin', phone: '+33787654321', email: 'marie.martin@email.com', address: '2 avenue des Champs, Paris', idNumber: '987654321', kycStatus: 'pending', riskScore: 45, lastTransactionDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) },
-  { id: `cust_${uuidv4()}`, name: 'Pierre Dubois', phone: '+33655555555', email: 'pierre.dubois@email.com', address: '5 place de la Bourse, Lyon', idNumber: '555555555', kycStatus: 'verified', riskScore: 15, lastTransactionDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000) },
-  { id: `cust_${uuidv4()}`, name: 'Sophie Lefebvre', phone: '+33698765432', email: 'sophie.l@email.com', address: '12 bd Saint-Germain, Paris', idNumber: '111222333', kycStatus: 'verified', riskScore: 20, lastTransactionDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
   
   // Casablanca customers
   { id: `cust_${uuidv4()}`, name: 'Ahmed Ben Ali', phone: '+212612345678', email: 'ahmed.benali@email.com', address: '3 boulevard Mohammed V, Casablanca', idNumber: 'AB123456', kycStatus: 'verified', riskScore: 25, lastTransactionDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
   { id: `cust_${uuidv4()}`, name: 'Fatima El Mansouri', phone: '+212661234567', email: 'fatima.m@email.com', address: '15 rue Hassan II, Casablanca', idNumber: 'FM789012', kycStatus: 'pending', riskScore: 40, lastTransactionDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
-  { id: `cust_${uuidv4()}`, name: 'Mohamed Benali', phone: '+212655551234', email: 'mohamed.b@email.com', address: '8 avenue de la Liberté, Rabat', idNumber: 'MB345678', kycStatus: 'verified', riskScore: 20, lastTransactionDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000) },
-  { id: `cust_${uuidv4()}`, name: 'Aicha Zahra', phone: '+212677889900', email: 'aicha.z@email.com', address: '22 quartier Maarif, Casablanca', idNumber: 'AZ567890', kycStatus: 'verified', riskScore: 18, lastTransactionDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
   
   // Douala customers
   { id: `cust_${uuidv4()}`, name: 'Fatou Diop', phone: '+237671234567', email: 'fatou.diop@email.com', address: '4 route de la Corniche, Douala', idNumber: 'CM987654', kycStatus: 'rejected', riskScore: 90, lastTransactionDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) },
   { id: `cust_${uuidv4()}`, name: 'Mamadou Ndiaye', phone: '+237695551234', email: 'mamadou.n@email.com', address: '12 avenue de la Réunification, Douala', idNumber: 'MN123456', kycStatus: 'verified', riskScore: 30, lastTransactionDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
-  { id: `cust_${uuidv4()}`, name: 'Aminata Sow', phone: '+237677558765', email: 'aminata.s@email.com', address: '18 rue Joss, Douala', idNumber: 'AS789012', kycStatus: 'pending', riskScore: 50, lastTransactionDate: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000) },
-  { id: `cust_${uuidv4()}`, name: 'Paul Biya', phone: '+237688994455', email: 'paul.b@email.com', address: '5 quartier Bonapriso, Douala', idNumber: 'PB345678', kycStatus: 'verified', riskScore: 25, lastTransactionDate: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000) },
   
   // Kigali customers
   { id: `cust_${uuidv4()}`, name: 'Grace Uwimana', phone: '+250788123456', email: 'grace.u@email.com', address: '10 KG 15 Ave, Kigali', idNumber: 'RW123456', kycStatus: 'verified', riskScore: 15, lastTransactionDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
   { id: `cust_${uuidv4()}`, name: 'Jean Baptiste Nzeyimana', phone: '+250788987654', email: 'jean.b@email.com', address: '25 KN 5 St, Kigali', idNumber: 'RW789012', kycStatus: 'pending', riskScore: 55, lastTransactionDate: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000) },
-  { id: `cust_${uuidv4()}`, name: 'Alice Mukamana', phone: '+250788556677', email: 'alice.m@email.com', address: '8 KG 7 Ave, Kigali', idNumber: 'RW345678', kycStatus: 'verified', riskScore: 22, lastTransactionDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000) },
   
   // Dubai customers
   { id: `cust_${uuidv4()}`, name: 'Omar Al Maktoum', phone: '+971501234567', email: 'omar.m@email.com', address: 'Business Bay, Dubai', idNumber: 'AE123456', kycStatus: 'verified', riskScore: 12, lastTransactionDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
   { id: `cust_${uuidv4()}`, name: 'Layla Hassan', phone: '+971502345678', email: 'layla.h@email.com', address: 'Jumeirah Beach Road, Dubai', idNumber: 'AE789012', kycStatus: 'verified', riskScore: 18, lastTransactionDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
-  { id: `cust_${uuidv4()}`, name: 'Carlos Silva', phone: '+971503456789', email: 'carlos.s@email.com', address: 'Marina District, Dubai', idNumber: 'AE345678', kycStatus: 'none', riskScore: 65, lastTransactionDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000) },
-  { id: `cust_${uuidv4()}`, name: 'Anna Kowalski', phone: '+971504567890', email: 'anna.k@email.com', address: 'Downtown Dubai', idNumber: 'AE567890', kycStatus: 'rejected', riskScore: 85, lastTransactionDate: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000) },
+];
+
+// Opérations de liquidité (Cash In/Out)
+export interface LiquidityOperation {
+  id: string;
+  agencyId: string;
+  agencyName: string;
+  type: 'cash_in' | 'cash_out';
+  currency: string;
+  amount: number;
+  timestamp: Date;
+  reference: string;
+  initiatedBy: string;
+  status: 'pending' | 'completed' | 'rejected';
+}
+
+export const mockLiquidityOperations: LiquidityOperation[] = [
+  {
+    id: 'liq_op_1',
+    agencyId: '1',
+    agencyName: 'Agence Paris',
+    type: 'cash_in',
+    currency: 'EUR',
+    amount: 50000.00,
+    timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    reference: 'CASHIN-PAR01-001',
+    initiatedBy: 'emp_1',
+    status: 'completed'
+  },
+  {
+    id: 'liq_op_2',
+    agencyId: '2',
+    agencyName: 'Agence Douala',
+    type: 'cash_out',
+    currency: 'XOF',
+    amount: 15000000.00,
+    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    reference: 'CASHOUT-DLA01-001',
+    initiatedBy: 'emp_3',
+    status: 'completed'
+  },
+  {
+    id: 'liq_op_3',
+    agencyId: '3',
+    agencyName: 'Agence Casablanca',
+    type: 'cash_in',
+    currency: 'MAD',
+    amount: 100000.00,
+    timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    reference: 'CASHIN-CAS01-001',
+    initiatedBy: 'emp_4',
+    status: 'completed'
+  }
 ];
 
 const transactionTypes: TransactionType[] = [
@@ -69,12 +113,21 @@ const transactionTypes: TransactionType[] = [
 
 const currencies = ['EUR', 'USD', 'XOF', 'MAD', 'AED', 'RWF'];
 
+// Fonction d'aide pour formater les montants de manière cohérente
+export const formatAmount = (amount: number, currency: string): string => {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount);
+};
+
 function generateCoherentTransaction(index: number): Transaction {
   const agencies = mockAgencies;
   const customers = mockCustomers;
   
-  // Select transaction type with realistic distribution
-  const typeWeights = [0.4, 0.3, 0.2, 0.1]; // internal_transfer, international_transfer, currency_exchange, payment
+  const typeWeights = [0.4, 0.3, 0.2, 0.1];
   let typeIndex = 0;
   const random = Math.random();
   let cumulative = 0;
@@ -87,11 +140,10 @@ function generateCoherentTransaction(index: number): Transaction {
   }
   const type = transactionTypes[typeIndex];
   
-  // Select realistic currency pairs based on agency locations
-  let fromCurrency, toCurrency, agency, destinationAgency;
+  const agency = agencies[Math.floor(Math.random() * agencies.length)];
+  let fromCurrency, toCurrency, destinationAgency;
   
-  agency = agencies[Math.floor(Math.random() * agencies.length)];
-  
+  // Détermination des devises en fonction du pays de l'agence
   switch (agency.country) {
     case "France":
       fromCurrency = Math.random() > 0.3 ? "EUR" : "USD";
@@ -112,12 +164,10 @@ function generateCoherentTransaction(index: number): Transaction {
       fromCurrency = "EUR";
   }
   
-  // Select destination currency based on transaction type and realistic flows
   if (type === 'internal_transfer') {
     destinationAgency = agencies.find(a => a.id !== agency.id) || agencies[0];
-    toCurrency = fromCurrency; // Same currency for internal transfers
+    toCurrency = fromCurrency;
   } else {
-    // Common currency exchange patterns
     const exchangePatterns = {
       "EUR": ["XOF", "MAD", "USD"],
       "USD": ["AED", "RWF", "EUR"],
@@ -129,57 +179,52 @@ function generateCoherentTransaction(index: number): Transaction {
     
     const possibleTo = exchangePatterns[fromCurrency] || ["EUR"];
     toCurrency = possibleTo[Math.floor(Math.random() * possibleTo.length)];
-    
     destinationAgency = agencies.find(a => a.id !== agency.id) || agencies[0];
   }
   
-  // Generate realistic amounts based on currency and transaction type
-  let amount;
+  // Montants cohérents et formatés
   const baseAmounts = {
-    "EUR": [50, 100, 250, 500, 1000, 2000],
-    "USD": [60, 120, 300, 600, 1200, 2400],
-    "XOF": [30000, 60000, 150000, 300000, 600000, 1200000],
-    "MAD": [500, 1000, 2500, 5000, 10000, 20000],
-    "AED": [200, 400, 1000, 2000, 4000, 8000],
-    "RWF": [50000, 100000, 250000, 500000, 1000000, 2000000]
+    "EUR": [100.00, 250.00, 500.00, 1000.00, 2500.00],
+    "USD": [120.00, 300.00, 600.00, 1200.00, 3000.00],
+    "XOF": [65000.00, 160000.00, 320000.00, 650000.00, 1600000.00],
+    "MAD": [1000.00, 2500.00, 5000.00, 10000.00, 25000.00],
+    "AED": [400.00, 1000.00, 2000.00, 4000.00, 10000.00],
+    "RWF": [100000.00, 250000.00, 500000.00, 1000000.00, 2500000.00]
   };
   
-  const amountChoices = baseAmounts[fromCurrency] || [100, 200, 500, 1000, 2000, 5000];
-  amount = amountChoices[Math.floor(Math.random() * amountChoices.length)] + Math.floor(Math.random() * 100);
+  const amountChoices = baseAmounts[fromCurrency] || [100.00, 250.00, 500.00, 1000.00, 2500.00];
+  const amount = amountChoices[Math.floor(Math.random() * amountChoices.length)];
   
-  // Realistic exchange rates
+  // Taux de change réalistes
   const exchangeRates = {
-    "EUR_XOF": 656,
-    "EUR_MAD": 11,
-    "EUR_USD": 1.1,
-    "EUR_AED": 4,
-    "EUR_RWF": 1100,
-    "USD_XOF": 600,
-    "USD_MAD": 10,
+    "EUR_XOF": 656.95,
+    "EUR_MAD": 11.20,
+    "EUR_USD": 1.10,
+    "EUR_AED": 4.00,
+    "EUR_RWF": 1100.00,
+    "USD_XOF": 600.50,
+    "USD_MAD": 10.20,
     "USD_AED": 3.67,
-    "USD_RWF": 1000,
-    "USD_EUR": 0.91
+    "USD_RWF": 1000.00
   };
   
   const rateKey = `${fromCurrency}_${toCurrency}`;
   const reverseRateKey = `${toCurrency}_${fromCurrency}`;
   let baseRate = exchangeRates[rateKey] || (exchangeRates[reverseRateKey] ? 1/exchangeRates[reverseRateKey] : 1);
   
-  const spread = Math.random() * 0.02; // Spread up to 2%
+  const spread = Math.random() * 0.02;
   const finalRate = baseRate * (1 + spread);
-  const convertedAmount = amount * finalRate;
+  const convertedAmount = parseFloat((amount * finalRate).toFixed(2));
   
-  // Commission calculation
   const tier = mockCommissionTiers.find(t => 
     amount >= t.minAmount && (!t.maxAmount || amount <= t.maxAmount)
   ) || mockCommissionTiers[0];
   
-  const commissionAmount = tier.fixedAmount + (amount * tier.percentage / 100);
+  const commissionAmount = parseFloat((tier.fixedAmount + (amount * tier.percentage / 100)).toFixed(2));
   
-  // Select customers based on agency location for more realistic relationships
   const localCustomers = customers.filter(c => {
     const customerCountry = getCustomerCountry(c.address || c.phone || "");
-    return customerCountry === agency.country || Math.random() > 0.8; // 20% chance for international customers
+    return customerCountry === agency.country || Math.random() > 0.8;
   });
   
   const sender = localCustomers.length > 0 ? 
@@ -192,7 +237,7 @@ function generateCoherentTransaction(index: number): Transaction {
   }
   
   const statuses = ['pending', 'completed', 'rejected', 'offline'];
-  const statusWeights = [0.1, 0.8, 0.05, 0.05]; // Most transactions are completed
+  const statusWeights = [0.1, 0.8, 0.05, 0.05];
   let statusIndex = 0;
   const statusRandom = Math.random();
   let statusCumulative = 0;
@@ -262,20 +307,20 @@ function generateCoherentTransaction(index: number): Transaction {
   return {
     id: `txn_${Date.now()}_${index}`,
     type,
-    amount,
+    amount: parseFloat(amount.toFixed(2)),
     fromCurrency,
     toCurrency,
-    exchangeRate: baseRate,
-    spread,
-    finalRate,
-    convertedAmount,
+    exchangeRate: parseFloat(baseRate.toFixed(4)),
+    spread: parseFloat(spread.toFixed(4)),
+    finalRate: parseFloat(finalRate.toFixed(4)),
+    convertedAmount: parseFloat(convertedAmount.toFixed(2)),
     commission: {
-      amount: tier.fixedAmount,
+      amount: parseFloat(tier.fixedAmount.toFixed(2)),
       percentage: tier.percentage,
       tier,
-      totalCommission: commissionAmount
+      totalCommission: parseFloat(commissionAmount.toFixed(2))
     },
-    fees: Math.floor(Math.random() * 10) + 2,
+    fees: parseFloat((Math.floor(Math.random() * 10) + 2).toFixed(2)),
     status,
     timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
     agencyId: agency.id,
@@ -305,9 +350,9 @@ function getCustomerCountry(addressOrPhone: string): string {
   if (addressOrPhone.includes("Douala") || addressOrPhone.includes("+237")) return "Cameroun";
   if (addressOrPhone.includes("Kigali") || addressOrPhone.includes("+250")) return "Rwanda";
   if (addressOrPhone.includes("Dubai") || addressOrPhone.includes("+971")) return "Émirats Arabes Unis";
-  return "France"; // Default
+  return "France";
 }
 
-export const mockTransactions: Transaction[] = Array.from({ length: 50 }, (_, index) => 
+export const mockTransactions: Transaction[] = Array.from({ length: 75 }, (_, index) => 
   generateCoherentTransaction(index)
 );
