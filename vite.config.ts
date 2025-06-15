@@ -10,8 +10,9 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     watch: {
-      usePolling: false,
-      useFsEvents: false,
+      usePolling: true,
+      interval: 1000,
+      binaryInterval: 1000,
       ignored: [
         '**/node_modules/**',
         '**/.git/**',
@@ -21,7 +22,13 @@ export default defineConfig(({ mode }) => ({
         '**/coverage/**',
         '**/.cache/**',
         '**/.temp/**',
-        '**/.tmp/**'
+        '**/.tmp/**',
+        '**/public/**',
+        '**/.vscode/**',
+        '**/.idea/**',
+        '**/package-lock.json',
+        '**/yarn.lock',
+        '**/bun.lockb'
       ]
     }
   },
@@ -37,5 +44,8 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     exclude: ['fsevents']
+  },
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' }
   }
 }));
