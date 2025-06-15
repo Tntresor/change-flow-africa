@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Transaction } from "@/types/transaction";
 import { mockTransactions } from "@/data/mockData";
 import { useLiquidityManager } from "./useLiquidityManager";
@@ -14,15 +14,15 @@ export function useTransactionState() {
   const { validateTransaction } = useTransactionValidation();
   const { toast } = useToast();
 
-  const handleViewTransaction = (transaction: Transaction) => {
+  const handleViewTransaction = useCallback((transaction: Transaction) => {
     setSelectedTransaction(transaction);
-  };
+  }, []);
 
-  const handleCloseDetailDialog = () => {
+  const handleCloseDetailDialog = useCallback(() => {
     setSelectedTransaction(null);
-  };
+  }, []);
 
-  const handleAddTransaction = (newTransaction: Transaction) => {
+  const handleAddTransaction = useCallback((newTransaction: Transaction) => {
     // Valider la transaction avant de l'ajouter
     const validation = validateTransaction(newTransaction);
     
@@ -45,7 +45,7 @@ export function useTransactionState() {
       }
     };
 
-    setTransactions([transactionWithAgent, ...transactions]);
+    setTransactions(currentTransactions => [transactionWithAgent, ...currentTransactions]);
     
     // Mettre à jour les balances de liquidité
     updateBalanceAfterTransaction(transactionWithAgent);
@@ -56,15 +56,15 @@ export function useTransactionState() {
       title: "Transaction créée",
       description: "La transaction a été créée avec succès",
     });
-  };
+  }, [validateTransaction, toast, updateBalanceAfterTransaction]);
 
-  const handleCloseAddForm = () => {
+  const handleCloseAddForm = useCallback(() => {
     setShowAddForm(false);
-  };
+  }, []);
 
-  const handleOpenAddForm = () => {
+  const handleOpenAddForm = useCallback(() => {
     setShowAddForm(true);
-  };
+  }, []);
 
   return {
     transactions,

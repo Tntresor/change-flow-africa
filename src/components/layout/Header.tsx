@@ -1,7 +1,7 @@
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Bell, Plus, Settings } from "lucide-react";
+import { Bell, Plus, Settings, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
@@ -10,8 +10,7 @@ export function Header() {
   const { title, description } = usePageTitle();
 
   const handleNewTransaction = () => {
-    navigate('/transactions');
-    // On pourrait aussi déclencher directement l'ouverture du formulaire de nouvelle transaction
+    navigate('/transactions?new=true');
   };
 
   const handleSettings = () => {
@@ -41,6 +40,15 @@ export function Header() {
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Nouvelle transaction</span>
+          </Button>
+          <Button 
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => navigate('/customers')}
+          >
+            <Users className="w-4 h-4" />
+            <span className="hidden sm:inline">Clients</span>
           </Button>
           <Button 
             variant="ghost" 

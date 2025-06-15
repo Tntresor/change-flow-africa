@@ -3,6 +3,8 @@ import { useTransactionFilters } from "@/hooks/useTransactionFilters";
 import { useTransactionState } from "@/hooks/useTransactionState";
 import { TransactionPageLayout } from "@/components/transactions/TransactionPageLayout";
 import { TransactionDialogs } from "@/components/transactions/TransactionDialogs";
+import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function TransactionsPage() {
   const {
@@ -12,7 +14,7 @@ export default function TransactionsPage() {
     handleViewTransaction,
     handleCloseDetailDialog,
     handleAddTransaction,
-    handleCloseAddForm,
+    handleCloseAddForm: originalCloseAddForm,
     handleOpenAddForm,
   } = useTransactionState();
 
@@ -21,6 +23,22 @@ export default function TransactionsPage() {
     filteredTransactions, 
     hasActiveFilters 
   } = useTransactionFilters(transactions);
+  
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('new') === 'true') {
+      handleOpenAddForm();
+    }
+  }, [searchParams, handleOpenAddForm]);
+
+  const handleCloseAddForm = () => {
+    originalCloseAddForm();
+    setSearchParams(params => {
+      params.delete('new');
+      return params;
+    }, { replace: true });
+  };
 
   return (
     <>
