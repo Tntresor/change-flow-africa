@@ -22,6 +22,9 @@ export interface Transaction {
   validationType: 'blocking' | 'warning' | 'none';
   isOffline?: boolean;
   prefixId?: string;
+  category?: TransactionCategory;
+  customerName?: string;
+  customerPhone?: string;
 }
 
 export type TransactionType = 
@@ -60,6 +63,13 @@ export interface CommissionTier {
   maxAmount?: number;
   fixedAmount: number;
   percentage: number;
+}
+
+export interface TransactionCategory {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
 }
 
 export interface Agency {

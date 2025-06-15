@@ -20,6 +20,8 @@ export interface CommissionTierSettings {
   currency: string;
   isActive: boolean;
   order: number; // Ordre d'application des paliers
+  type?: 'percentage' | 'fixed';
+  value?: number;
 }
 
 export interface FeeSettings {
@@ -39,3 +41,5 @@ export interface SpreadSettings {
   sellSpread: number; // Spread à la vente
   isActive: boolean;
 }
+
+export interface CommissionSettings extends CommissionTierSettings {}
