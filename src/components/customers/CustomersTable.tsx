@@ -1,28 +1,18 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Customer, KycStatus } from "@/types/customer";
+import { Customer } from "@/types/customer";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
+import { kycStatusText, kycStatusVariant } from "@/lib/kycUtils";
 
 interface CustomersTableProps {
     customers: Customer[];
 }
 
-const kycStatusVariant: Record<KycStatus, "default" | "secondary" | "destructive" | "outline"> = {
-    verified: 'default',
-    pending: 'secondary',
-    rejected: 'destructive',
-    none: 'outline'
-};
-
-const kycStatusText: Record<KycStatus, string> = {
-    verified: 'Vérifié',
-    pending: 'En attente',
-    rejected: 'Rejeté',
-    none: 'Aucun'
-};
-
 export function CustomersTable({ customers }: CustomersTableProps) {
+    const navigate = useNavigate();
+
     if (customers.length === 0) {
         return <p className="text-center text-gray-500 py-8">Aucun client trouvé.</p>
     }
@@ -40,7 +30,11 @@ export function CustomersTable({ customers }: CustomersTableProps) {
             </TableHeader>
             <TableBody>
                 {customers.map((customer) => (
-                    <TableRow key={customer.id}>
+                    <TableRow 
+                        key={customer.id}
+                        onClick={() => navigate(`/customers/${customer.id}`)}
+                        className="cursor-pointer hover:bg-gray-50"
+                    >
                         <TableCell className="font-medium">{customer.name}</TableCell>
                         <TableCell>{customer.phone || 'N/A'}</TableCell>
                         <TableCell>{customer.email || 'N/A'}</TableCell>

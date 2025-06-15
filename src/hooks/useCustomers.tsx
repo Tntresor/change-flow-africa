@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { mockTransactions } from '@/data/mockData';
 import { CustomerInfo, Transaction } from '@/types/transaction';
 import { Customer } from '@/types/customer';
@@ -44,5 +44,9 @@ export function useCustomers() {
     const [transactions] = useState<Transaction[]>(mockTransactions);
     const customers = useMemo(() => extractCustomersFromTransactions(transactions), [transactions]);
     
-    return { customers };
+    const getCustomerById = useCallback((id: string) => {
+        return customers.find(c => c.id === id);
+    }, [customers]);
+
+    return { customers, getCustomerById };
 }
