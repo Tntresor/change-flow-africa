@@ -11,13 +11,14 @@ import {
   SidebarHeader,
   SidebarFooter
 } from "@/components/ui/sidebar";
-import { Home, ArrowRightLeft, Settings, BarChart3, Users, Upload, TrendingUp } from "lucide-react";
+import { Home, ArrowRightLeft, Settings, BarChart3, Users, Upload, TrendingUp, Droplets } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const menuItems = [
   { title: "Tableau de bord", url: "/", icon: Home },
   { title: "Transactions", url: "/transactions", icon: ArrowRightLeft },
   { title: "Agences", url: "/agencies", icon: Users },
+  { title: "Liquidité", url: "/liquidity", icon: Droplets },
   { title: "Taux et commissions", url: "/rates", icon: TrendingUp },
   { title: "Statistiques", url: "/stats", icon: BarChart3 },
   { title: "Import", url: "/import", icon: Upload },

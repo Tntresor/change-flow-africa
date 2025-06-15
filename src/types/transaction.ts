@@ -1,4 +1,3 @@
-
 export interface Transaction {
   id: string;
   type: TransactionType;
@@ -25,6 +24,11 @@ export interface Transaction {
   category?: TransactionCategory;
   customerName?: string;
   customerPhone?: string;
+  agent?: {
+    id: string;
+    name: string;
+    role: string;
+  };
 }
 
 export type TransactionType = 
