@@ -7,6 +7,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import TransactionsPage from "./pages/TransactionsPage";
+import AgenciesPage from "./pages/AgenciesPage";
+import StatsPage from "./pages/StatsPage";
+import ImportPage from "./pages/ImportPage";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,10 +25,10 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/transactions" element={<TransactionsPage />} />
-            <Route path="/agencies" element={<div>Page Agences à venir</div>} />
-            <Route path="/stats" element={<div>Page Statistiques à venir</div>} />
-            <Route path="/import" element={<div>Page Import à venir</div>} />
-            <Route path="/settings" element={<div>Page Paramètres à venir</div>} />
+            <Route path="/agencies" element={<AgenciesPage />} />
+            <Route path="/stats" element={<StatsPage />} />
+            <Route path="/import" element={<ImportPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AppLayout>
