@@ -1,26 +1,17 @@
 
 import { useCommissionsManager } from "./hooks/useCommissionsManager";
 import { CommissionsSection } from "./CommissionsSection";
-import { FeesSection } from "./FeesSection";
 
 export function CommissionsManager() {
   const {
     commissions,
-    fees,
     editingCommissionId,
-    editingFeeId,
     editCommissionForm,
     setEditCommissionForm,
-    editFeeForm,
-    setEditFeeForm,
     handleEditCommission,
     handleSaveCommission,
     handleCancelCommissionEdit,
-    handleEditFee,
-    handleSaveFee,
-    handleCancelFeeEdit,
     toggleCommissionActive,
-    toggleFeeActive,
   } = useCommissionsManager();
 
   return (
@@ -34,17 +25,6 @@ export function CommissionsManager() {
         onCancel={handleCancelCommissionEdit}
         onToggleActive={toggleCommissionActive}
         onFormChange={setEditCommissionForm}
-      />
-
-      <FeesSection
-        fees={fees}
-        editingFeeId={editingFeeId}
-        editFeeForm={editFeeForm}
-        onEdit={handleEditFee}
-        onSave={handleSaveFee}
-        onCancel={handleCancelFeeEdit}
-        onToggleActive={toggleFeeActive}
-        onFormChange={setEditFeeForm}
       />
     </div>
   );

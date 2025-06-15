@@ -2,6 +2,7 @@
 import { ExchangeRatesManager } from "@/components/rates/ExchangeRatesManager";
 import { CommissionTiersManager } from "@/components/rates/CommissionTiersManager";
 import { CommissionsManager } from "@/components/rates/CommissionsManager";
+import { FeesManager } from "@/components/rates/FeesManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function RatesPage() {
@@ -35,7 +36,7 @@ export default function RatesPage() {
         </TabsContent>
         
         <TabsContent value="fees">
-          <CommissionsManager />
+          <FeesManager />
         </TabsContent>
       </Tabs>
     </div>
