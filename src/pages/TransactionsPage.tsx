@@ -1,39 +1,26 @@
 
-import { useState } from "react";
 import { useTransactionFilters } from "@/hooks/useTransactionFilters";
+import { useTransactionState } from "@/hooks/useTransactionState";
 import { TransactionPageLayout } from "@/components/transactions/TransactionPageLayout";
 import { TransactionDialogs } from "@/components/transactions/TransactionDialogs";
-import { Transaction } from "@/types/transaction";
-import { mockTransactions } from "@/data/mockData";
 
 export default function TransactionsPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
+  const {
+    transactions,
+    selectedTransaction,
+    showAddForm,
+    handleViewTransaction,
+    handleCloseDetailDialog,
+    handleAddTransaction,
+    handleCloseAddForm,
+    handleOpenAddForm,
+  } = useTransactionState();
 
   const { 
-    filters, 
     setFilters, 
     filteredTransactions, 
     hasActiveFilters 
   } = useTransactionFilters(transactions);
-
-  const handleViewTransaction = (transaction: Transaction) => {
-    setSelectedTransaction(transaction);
-  };
-
-  const handleCloseDetailDialog = () => {
-    setSelectedTransaction(null);
-  };
-
-  const handleAddTransaction = (newTransaction: Transaction) => {
-    setTransactions([newTransaction, ...transactions]);
-    setShowAddForm(false);
-  };
-
-  const handleCloseAddForm = () => {
-    setShowAddForm(false);
-  };
 
   return (
     <>
@@ -41,7 +28,7 @@ export default function TransactionsPage() {
         transactions={transactions}
         filteredTransactions={filteredTransactions}
         hasActiveFilters={hasActiveFilters}
-        onAddTransaction={() => setShowAddForm(true)}
+        onAddTransaction={handleOpenAddForm}
         onViewTransaction={handleViewTransaction}
         onFiltersChange={setFilters}
       />
