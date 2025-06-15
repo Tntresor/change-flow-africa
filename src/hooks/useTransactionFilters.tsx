@@ -62,8 +62,13 @@ export function useTransactionFilters(transactions: Transaction[]) {
     });
   }, [filters, transactions]);
 
-  const hasActiveFilters = filters.search || filters.status !== "all" || 
-    filters.currency !== "all" || filters.agency !== "all" || filters.dateRange;
+  const hasActiveFilters = Boolean(
+    filters.search || 
+    filters.status !== "all" || 
+    filters.currency !== "all" || 
+    filters.agency !== "all" || 
+    filters.dateRange
+  );
 
   return {
     filters,
