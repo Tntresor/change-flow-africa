@@ -122,6 +122,9 @@ export default function SettingsPage() {
       localStorage.setItem("exchangehub-primary-currency", primaryCurrency);
       localStorage.setItem("exchangehub-secondary-currency", secondaryCurrency);
       
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new Event('settingsUpdated'));
+      
       toast({
         title: "Paramètres sauvegardés",
         description: "Vos modifications ont été enregistrées avec succès.",
@@ -237,6 +240,9 @@ export default function SettingsPage() {
                       <SelectItem value="Europe/London">Europe/London (UTC+0)</SelectItem>
                       <SelectItem value="America/New_York">America/New_York (UTC-5)</SelectItem>
                       <SelectItem value="America/Toronto">America/Toronto (UTC-5)</SelectItem>
+                      <SelectItem value="Africa/Douala">Africa/Douala (UTC+1)</SelectItem>
+                      <SelectItem value="Africa/Kigali">Africa/Kigali (UTC+2)</SelectItem>
+                      <SelectItem value="Asia/Dubai">Asia/Dubai (UTC+4)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -253,6 +259,7 @@ export default function SettingsPage() {
                       <SelectItem value="fr">Français</SelectItem>
                       <SelectItem value="en">English</SelectItem>
                       <SelectItem value="es">Español</SelectItem>
+                      <SelectItem value="ar">العربية</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

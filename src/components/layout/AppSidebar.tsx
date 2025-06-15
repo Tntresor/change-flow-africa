@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Home, ArrowRightLeft, Settings, BarChart3, Users, Upload, TrendingUp, Droplets, Building } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const menuItems = [
   { title: "Tableau de bord", url: "/", icon: Home },
@@ -28,6 +29,44 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const [companyName, setCompanyName] = useState("ExchangeHub");
+
+  useEffect(() => {
+    const loadCompanyName = () => {
+      try {
+        const savedSettings = localStorage.getItem("exchangehub-general-settings");
+        if (savedSettings) {
+          const settings = JSON.parse(savedSettings);
+          setCompanyName(settings.companyName || "ExchangeHub");
+        }
+      } catch (error) {
+        console.error("Error loading company name", error);
+      }
+    };
+
+    loadCompanyName();
+
+    // Listen for storage changes to update the company name in real-time
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "exchangehub-general-settings") {
+        loadCompanyName();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events when settings are saved in the same tab
+    const handleSettingsUpdate = () => {
+      loadCompanyName();
+    };
+    
+    window.addEventListener('settingsUpdated', handleSettingsUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('settingsUpdated', handleSettingsUpdate);
+    };
+  }, []);
 
   return (
     <Sidebar className="border-r border-gray-200">
@@ -37,7 +76,7 @@ export function AppSidebar() {
             <ArrowRightLeft className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-gray-900">ExchangeHub</h1>
+            <h1 className="text-lg font-bold text-gray-900">{companyName}</h1>
             <p className="text-xs text-gray-500">Multi-pays</p>
           </div>
         </div>

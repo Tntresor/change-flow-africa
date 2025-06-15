@@ -3,6 +3,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
 import { TransactionFormData } from "./TransactionFormData";
+import { useCurrencyManager } from "@/components/settings/hooks/useCurrencyManager";
 
 interface CurrencyFieldsProps {
   form: UseFormReturn<TransactionFormData>;
@@ -10,6 +11,8 @@ interface CurrencyFieldsProps {
 }
 
 export function CurrencyFields({ form, onCurrencyChange }: CurrencyFieldsProps) {
+  const { currencies } = useCurrencyManager();
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <FormField
@@ -24,13 +27,15 @@ export function CurrencyFields({ form, onCurrencyChange }: CurrencyFieldsProps) 
             }} value={field.value}>
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="EUR, USD, GBP..." />
+                  <SelectValue placeholder="Sélectionner une devise..." />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="EUR">EUR - Euro</SelectItem>
-                <SelectItem value="USD">USD - Dollar US</SelectItem>
-                <SelectItem value="GBP">GBP - Livre Sterling</SelectItem>
+                {currencies.map((currency) => (
+                  <SelectItem key={currency.code} value={currency.code}>
+                    {currency.code} - {currency.name} ({currency.symbol})
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <FormMessage />
@@ -50,13 +55,15 @@ export function CurrencyFields({ form, onCurrencyChange }: CurrencyFieldsProps) 
             }} value={field.value}>
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="EUR, USD, GBP..." />
+                  <SelectValue placeholder="Sélectionner une devise..." />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="EUR">EUR - Euro</SelectItem>
-                <SelectItem value="USD">USD - Dollar US</SelectItem>
-                <SelectItem value="GBP">GBP - Livre Sterling</SelectItem>
+                {currencies.map((currency) => (
+                  <SelectItem key={currency.code} value={currency.code}>
+                    {currency.code} - {currency.name} ({currency.symbol})
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <FormMessage />

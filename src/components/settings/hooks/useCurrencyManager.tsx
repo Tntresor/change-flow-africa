@@ -14,6 +14,7 @@ const defaultCurrencies: Currency[] = [
   { code: "XOF", name: "Franc CFA", symbol: "F CFA", isDefault: true },
   { code: "MAD", name: "Dirham Marocain", symbol: "DH", isDefault: true },
   { code: "AED", name: "Dirham des Émirats", symbol: "د.إ", isDefault: true },
+  { code: "RWF", name: "Franc Rwandais", symbol: "RF", isDefault: true },
   { code: "GBP", name: "Livre Sterling", symbol: "£", isDefault: false },
   { code: "CAD", name: "Dollar Canadien", symbol: "C$", isDefault: false },
 ];
