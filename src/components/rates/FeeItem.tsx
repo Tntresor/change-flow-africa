@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FeeSettings } from "@/types/rates";
-import { Edit, Save, X } from "lucide-react";
+import { Edit, Save, X, Trash2 } from "lucide-react";
 
 interface FeeItemProps {
   fee: FeeSettings;
@@ -16,6 +16,7 @@ interface FeeItemProps {
   onCancel: () => void;
   onToggleActive: (id: string) => void;
   onFormChange: (form: Partial<FeeSettings>) => void;
+  onDelete: (id: string) => void;
 }
 
 export function FeeItem({ 
@@ -26,7 +27,8 @@ export function FeeItem({
   onSave, 
   onCancel, 
   onToggleActive, 
-  onFormChange 
+  onFormChange,
+  onDelete
 }: FeeItemProps) {
   return (
     <div className="border rounded-lg p-4">
@@ -49,15 +51,27 @@ export function FeeItem({
               </Button>
             </>
           ) : (
-            <Button size="sm" variant="outline" onClick={() => onEdit(fee)}>
-              <Edit className="w-4 h-4" />
-            </Button>
+            <>
+              <Button size="sm" variant="outline" onClick={() => onEdit(fee)}>
+                <Edit className="w-4 h-4" />
+              </Button>
+              <Button size="sm" variant="destructive" onClick={() => onDelete(fee.id)}>
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </>
           )}
         </div>
       </div>
 
       {isEditing ? (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-4 gap-4">
+          <div>
+            <Label>Nom</Label>
+            <Input
+              value={editForm.name || ''}
+              onChange={(e) => onFormChange({...editForm, name: e.target.value})}
+            />
+          </div>
           <div>
             <Label>Montant</Label>
             <Input
@@ -79,7 +93,8 @@ export function FeeItem({
               <SelectContent>
                 <SelectItem value="EUR">EUR</SelectItem>
                 <SelectItem value="USD">USD</SelectItem>
-                <SelectItem value="GBP">GBP</SelectItem>
+                <SelectItem value="XOF">XOF</SelectItem>
+                <SelectItem value="MAD">MAD</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -92,7 +107,7 @@ export function FeeItem({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4 text-sm">
+        <div className="grid grid-cols-4 gap-4 text-sm">
           <div>
             <span className="text-gray-500">Montant:</span>
             <div className="font-semibold">{fee.amount} {fee.currency}</div>
@@ -104,6 +119,10 @@ export function FeeItem({
           <div>
             <span className="text-gray-500">Description:</span>
             <div className="font-semibold">{fee.description || '-'}</div>
+          </div>
+          <div>
+            <span className="text-gray-500">Type de transaction:</span>
+            <div className="font-semibold">{fee.transactionType || 'Tous'}</div>
           </div>
         </div>
       )}

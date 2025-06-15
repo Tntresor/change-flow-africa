@@ -4,8 +4,8 @@ export interface ExchangeRateSettings {
   fromCurrency: string;
   toCurrency: string;
   baseRate: number;
-  spread: number; // Spread en points de base (1 point = 0.01%)
-  finalRate: number; // Taux final appliqué (baseRate + spread)
+  spread: number;
+  finalRate: number;
   isActive: boolean;
   lastUpdated: Date;
 }
@@ -15,13 +15,14 @@ export interface CommissionTierSettings {
   name: string;
   minAmount: number;
   maxAmount?: number;
-  fixedAmount: number; // Montant fixe
-  percentage: number; // Pourcentage
+  fixedAmount: number;
+  percentage: number;
   currency: string;
   isActive: boolean;
-  order: number; // Ordre d'application des paliers
-  type?: 'percentage' | 'fixed';
-  value?: number;
+  order: number;
+  type: 'percentage' | 'fixed' | 'percentage_plus_fixed' | 'percentage_with_minimum';
+  value: number;
+  transactionType?: string; // Type de transaction spécifique
 }
 
 export interface FeeSettings {
@@ -31,16 +32,5 @@ export interface FeeSettings {
   currency: string;
   isActive: boolean;
   description?: string;
+  transactionType?: string; // Type de transaction spécifique
 }
-
-export interface SpreadSettings {
-  id: string;
-  fromCurrency: string;
-  toCurrency: string;
-  buySpread: number; // Spread à l'achat
-  sellSpread: number; // Spread à la vente
-  isActive: boolean;
-}
-
-// Add the CommissionSettings alias for backward compatibility
-export interface CommissionSettings extends CommissionTierSettings {}
