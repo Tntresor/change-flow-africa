@@ -3,6 +3,19 @@ import { AgencyLiquidity, PoolLiquidity, LiquidityTransfer, CurrencyBalance } fr
 import { Transaction } from "@/types/transaction";
 import { useToast } from "@/hooks/use-toast";
 
+// Add cash operation interface
+interface CashOperation {
+  id: string;
+  type: 'cash_in' | 'cash_out';
+  currency: string;
+  amount: number;
+  reason: string;
+  reference: string;
+  timestamp: Date;
+  agencyId: string;
+  agencyName: string;
+}
+
 // Updated mock data for the new agencies
 const mockAgencyLiquidity: AgencyLiquidity[] = [
   {
@@ -95,6 +108,7 @@ export function useLiquidityManager() {
   const [agencyLiquidity, setAgencyLiquidity] = useState<AgencyLiquidity[]>(mockAgencyLiquidity);
   const [poolLiquidity, setPoolLiquidity] = useState<PoolLiquidity[]>([]);
   const [transfers, setTransfers] = useState<LiquidityTransfer[]>([]);
+  const [cashOperations, setCashOperations] = useState<CashOperation[]>([]);
   const { toast } = useToast();
 
   // Calcul de la liquidité poolée
@@ -179,6 +193,68 @@ export function useLiquidityManager() {
     });
   };
 
+  const processCashOperation = (
+    agencyId: string,
+    operation: {
+      type: 'cash_in' | 'cash_out';
+      currency: string;
+      amount: number;
+      reason: string;
+      reference: string;
+    }
+  ) => {
+    const agency = agencyLiquidity.find(a => a.agencyId === agencyId);
+    if (!agency) {
+      toast({
+        title: "Erreur",
+        description: "Agence introuvable",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create the operation record
+    const newOperation: CashOperation = {
+      id: `cash_${Date.now()}`,
+      ...operation,
+      timestamp: new Date(),
+      agencyId,
+      agencyName: agency.agencyName
+    };
+
+    // Update the agency's balance
+    setAgencyLiquidity(prev => prev.map(ag => {
+      if (ag.agencyId === agencyId) {
+        return {
+          ...ag,
+          balances: ag.balances.map(balance => {
+            if (balance.currency === operation.currency) {
+              const amountChange = operation.type === 'cash_in' ? operation.amount : -operation.amount;
+              const newBalance = balance.balance + amountChange;
+              return {
+                ...balance,
+                balance: newBalance,
+                availableAmount: newBalance - balance.reservedAmount,
+                status: getBalanceStatus(newBalance, balance.minThreshold, balance.maxThreshold)
+              };
+            }
+            return balance;
+          }),
+          lastUpdated: new Date()
+        };
+      }
+      return ag;
+    }));
+
+    // Add to operations history
+    setCashOperations(prev => [newOperation, ...prev]);
+
+    toast({
+      title: `${operation.type === 'cash_in' ? 'Réapprovisionnement' : 'Collecte'} effectué`,
+      description: `${operation.amount} ${operation.currency} - ${agency.agencyName}`,
+    });
+  };
+
   const getBalanceStatus = (balance: number, minThreshold: number, maxThreshold: number): 'critical' | 'low' | 'normal' | 'high' => {
     if (balance < minThreshold * 0.5) return 'critical';
     if (balance < minThreshold) return 'low';
@@ -258,7 +334,9 @@ export function useLiquidityManager() {
     agencyLiquidity,
     poolLiquidity,
     transfers,
+    cashOperations,
     updateBalanceAfterTransaction,
     transferLiquidity,
+    processCashOperation,
   };
 }

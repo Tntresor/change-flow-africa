@@ -6,10 +6,11 @@ import { AgencyLiquidityView } from "./AgencyLiquidityView";
 import { PoolLiquidityView } from "./PoolLiquidityView";
 import { LiquidityTransfers } from "./LiquidityTransfers";
 import { LiquidityAlerts } from "./LiquidityAlerts";
-import { Droplets, Building, Shuffle, AlertTriangle } from "lucide-react";
+import { CashOperationsList } from "./CashOperationsList";
+import { Droplets, Building, Shuffle, AlertTriangle, CreditCard } from "lucide-react";
 
 export function LiquidityDashboard() {
-  const { agencyLiquidity, poolLiquidity, transfers } = useLiquidityManager();
+  const { agencyLiquidity, poolLiquidity, transfers, cashOperations } = useLiquidityManager();
 
   const totalAlerts = agencyLiquidity.reduce((sum, agency) => sum + agency.alerts.length, 0);
 
@@ -22,7 +23,7 @@ export function LiquidityDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Agences actives</CardTitle>
@@ -57,6 +58,16 @@ export function LiquidityDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Opérations Cash</CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{cashOperations.length}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Alertes actives</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -67,9 +78,10 @@ export function LiquidityDashboard() {
       </div>
 
       <Tabs defaultValue="agencies" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="agencies">Par Agence</TabsTrigger>
           <TabsTrigger value="pool">Liquidité Poolée</TabsTrigger>
+          <TabsTrigger value="operations">Opérations Cash</TabsTrigger>
           <TabsTrigger value="transfers">Transferts</TabsTrigger>
           <TabsTrigger value="alerts">Alertes</TabsTrigger>
         </TabsList>
@@ -80,6 +92,10 @@ export function LiquidityDashboard() {
 
         <TabsContent value="pool">
           <PoolLiquidityView pools={poolLiquidity} />
+        </TabsContent>
+
+        <TabsContent value="operations">
+          <CashOperationsList operations={cashOperations} />
         </TabsContent>
 
         <TabsContent value="transfers">
