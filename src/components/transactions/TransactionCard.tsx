@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Transaction } from "@/types/transaction";
-import { Clock, CheckCircle, XCircle, Wifi, WifiOff, ArrowRight, Building, Globe, Users } from "lucide-react";
+import { Clock, CheckCircle, XCircle, Wifi, WifiOff, ArrowRight, Building, Globe, Users, User, Briefcase } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -29,9 +29,10 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
   const type = typeConfig[transaction.type];
   const StatusIcon = status.icon;
   const TypeIcon = type.icon;
+  const totalCosts = (transaction.commission?.totalCommission || 0) + (transaction.fees || 0);
 
   return (
-    <Card className="p-4 hover:shadow-md transition-shadow border-l-4" style={{borderLeftColor: type.color.replace('bg-', '#')}}>
+    <Card className="p-4 border-l-4" style={{borderLeftColor: type.color.replace('bg-', '#')}}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className={`w-8 h-8 ${type.color} rounded-full flex items-center justify-center text-white text-sm`}>
@@ -39,7 +40,7 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
           </div>
           <div>
             <p className="font-medium text-gray-900">{type.label}</p>
-            <p className="text-sm text-gray-500">{transaction.agencyName}</p>
+            <p className="text-sm text-gray-500">ID: {transaction.prefixId || transaction.id.slice(0, 8)}</p>
           </div>
         </div>
         <Badge className={status.color}>
@@ -51,13 +52,13 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
       {/* Devises et montants */}
       <div className="grid grid-cols-2 gap-4 mb-3">
         <div>
-          <p className="text-sm text-gray-500">Montant initial</p>
+          <p className="text-sm text-gray-500">Montant envoyé</p>
           <p className="font-semibold text-gray-900">
             {transaction.amount.toLocaleString()} {transaction.fromCurrency}
           </p>
         </div>
         <div>
-          <p className="text-sm text-gray-500">Montant final</p>
+          <p className="text-sm text-gray-500">Montant reçu</p>
           <p className="font-semibold text-gray-900">
             {transaction.convertedAmount.toLocaleString()} {transaction.toCurrency}
           </p>
@@ -91,7 +92,54 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
         </div>
       </div>
       
-      <div className="flex items-center justify-between text-sm">
+      {/* Agent & Agence */}
+      {transaction.agent && (
+        <div className="border-t pt-3 mt-3">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-gray-500">Traité par (Agent)</p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <User className="w-4 h-4 text-gray-400" />
+                <span className="font-medium">{transaction.agent.name} <span className="text-gray-500 font-normal">({transaction.agent.role})</span></span>
+              </div>
+            </div>
+            <div>
+              <p className="text-gray-500">Agence</p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <Briefcase className="w-4 h-4 text-gray-400" />
+                <span className="font-medium">{transaction.agencyName}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Frais et commissions */}
+      <div className="border-t pt-3 mt-3">
+        <h5 className="text-sm font-medium mb-2 text-gray-800">Détail des coûts</h5>
+        <div className="grid grid-cols-3 gap-4 text-sm">
+          <div>
+            <p className="text-gray-500">Commission</p>
+            <p className="font-semibold">
+              {(transaction.commission?.totalCommission || 0).toLocaleString()} {transaction.fromCurrency}
+            </p>
+          </div>
+          <div>
+            <p className="text-gray-500">Frais</p>
+            <p className="font-semibold">
+              {(transaction.fees || 0).toLocaleString()} {transaction.fromCurrency}
+            </p>
+          </div>
+          <div>
+            <p className="text-gray-500">Total prélevé</p>
+            <p className="font-semibold">
+              {totalCosts.toLocaleString()} {transaction.fromCurrency}
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div className="flex items-center justify-between text-sm border-t pt-3 mt-3">
         <span className="text-gray-500">
           {format(transaction.timestamp, "PPp", { locale: fr })}
         </span>

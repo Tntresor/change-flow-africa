@@ -3,9 +3,11 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Bell, Plus, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function Header() {
   const navigate = useNavigate();
+  const { title, description } = usePageTitle();
 
   const handleNewTransaction = () => {
     navigate('/transactions');
@@ -22,8 +24,8 @@ export function Header() {
         <div className="flex items-center gap-4">
           <SidebarTrigger className="text-gray-600 hover:text-gray-900" />
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Tableau de bord</h2>
-            <p className="text-sm text-gray-500">Vue d'ensemble des activités</p>
+            <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+            <p className="text-sm text-gray-500">{description}</p>
           </div>
         </div>
         

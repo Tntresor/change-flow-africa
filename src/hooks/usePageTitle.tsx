@@ -5,32 +5,34 @@ import { useLocation } from "react-router-dom";
 export function usePageTitle() {
   const location = useLocation();
 
-  const getPageTitle = () => {
+  const getPageInfo = () => {
     switch (location.pathname) {
       case "/":
-        return "Tableau de bord";
+        return { title: "Tableau de bord", description: "Vue d'ensemble des activités" };
       case "/transactions":
-        return "Transactions";
+        return { title: "Transactions", description: "Gérez et suivez toutes les transactions" };
       case "/agencies":
-        return "Agences";
+        return { title: "Agences", description: "Gérez vos agences et leurs employés" };
       case "/liquidity":
-        return "Liquidité";
+        return { title: "Liquidité", description: "Suivez la liquidité de vos agences" };
       case "/stats":
-        return "Statistiques";
+        return { title: "Statistiques", description: "Analysez les performances de votre activité" };
       case "/import":
-        return "Import";
+        return { title: "Import", description: "Importez des données en masse" };
       case "/rates":
-        return "Taux et Commissions";
+        return { title: "Taux et Commissions", description: "Configurez les taux de change et les frais" };
       case "/settings":
-        return "Paramètres";
+        return { title: "Paramètres", description: "Gérez les paramètres de l'application" };
       default:
-        return "Tableau de bord";
+        return { title: "Tableau de bord", description: "Vue d'ensemble des activités" };
     }
   };
 
-  useEffect(() => {
-    document.title = `${getPageTitle()} - Money Transfer`;
-  }, [location.pathname]);
+  const pageInfo = getPageInfo();
 
-  return getPageTitle();
+  useEffect(() => {
+    document.title = `${pageInfo.title} - Money Transfer`;
+  }, [location.pathname, pageInfo.title]);
+
+  return pageInfo;
 }
