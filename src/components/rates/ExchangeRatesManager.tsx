@@ -11,8 +11,10 @@ import { mockExchangeRates } from "@/data/ratesData";
 import { Edit, Save, X, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
 
 export function ExchangeRatesManager() {
+  const { toast } = useToast();
   const [rates, setRates] = useState<ExchangeRateSettings[]>(mockExchangeRates);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<ExchangeRateSettings>>({});
@@ -24,7 +26,7 @@ export function ExchangeRatesManager() {
 
   const handleSave = () => {
     if (editingId && editForm) {
-      const finalRate = editForm.baseRate! * (1 - (editForm.margin! / 100));
+      const finalRate = editForm.baseRate! + editForm.spread!;
       setRates(rates.map(rate => 
         rate.id === editingId 
           ? { ...rate, ...editForm, finalRate, lastUpdated: new Date() }
@@ -32,6 +34,10 @@ export function ExchangeRatesManager() {
       ));
       setEditingId(null);
       setEditForm({});
+      toast({
+        title: "Taux mis à jour",
+        description: "Le taux de change a été sauvegardé",
+      });
     }
   };
 
@@ -51,7 +57,7 @@ export function ExchangeRatesManager() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <RefreshCw className="w-5 h-5" />
-          Gestion des Taux de Change
+          Gestion des Taux de Change et Spreads
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -87,7 +93,7 @@ export function ExchangeRatesManager() {
               </div>
 
               {editingId === rate.id ? (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   <div>
                     <Label>Taux de base</Label>
                     <Input
@@ -98,36 +104,48 @@ export function ExchangeRatesManager() {
                     />
                   </div>
                   <div>
-                    <Label>Marge (%)</Label>
+                    <Label>Spread</Label>
                     <Input
                       type="number"
-                      step="0.1"
-                      value={editForm.margin || ''}
-                      onChange={(e) => setEditForm({...editForm, margin: parseFloat(e.target.value)})}
+                      step="0.0001"
+                      value={editForm.spread || ''}
+                      onChange={(e) => setEditForm({...editForm, spread: parseFloat(e.target.value)})}
                     />
                   </div>
                   <div>
                     <Label>Taux final</Label>
                     <Input
-                      value={(editForm.baseRate! * (1 - (editForm.margin! / 100))).toFixed(4)}
+                      value={((editForm.baseRate || 0) + (editForm.spread || 0)).toFixed(4)}
+                      readOnly
+                      className="bg-gray-50"
+                    />
+                  </div>
+                  <div>
+                    <Label>Spread (%)</Label>
+                    <Input
+                      value={editForm.baseRate ? (((editForm.spread || 0) / editForm.baseRate) * 100).toFixed(2) : '0.00'}
                       readOnly
                       className="bg-gray-50"
                     />
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-4 gap-4 text-sm">
                   <div>
                     <span className="text-gray-500">Taux de base:</span>
                     <div className="font-semibold">{rate.baseRate.toFixed(4)}</div>
                   </div>
                   <div>
-                    <span className="text-gray-500">Marge:</span>
-                    <div className="font-semibold">{rate.margin}%</div>
+                    <span className="text-gray-500">Spread:</span>
+                    <div className="font-semibold text-orange-600">+{rate.spread.toFixed(4)}</div>
                   </div>
                   <div>
                     <span className="text-gray-500">Taux final:</span>
                     <div className="font-semibold text-green-600">{rate.finalRate.toFixed(4)}</div>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Spread (%):</span>
+                    <div className="font-semibold text-blue-600">{((rate.spread / rate.baseRate) * 100).toFixed(2)}%</div>
                   </div>
                 </div>
               )}

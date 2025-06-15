@@ -7,6 +7,7 @@ export function useTransactionFilters(transactions: Transaction[]) {
   const [filters, setFilters] = useState<FilterState>({
     search: "",
     status: "all",
+    type: "all",
     currency: "all",
     agency: "all",
     dateRange: undefined,
@@ -20,7 +21,8 @@ export function useTransactionFilters(transactions: Transaction[]) {
         const matchesSearch = 
           transaction.id.toLowerCase().includes(searchTerm) ||
           transaction.prefixId?.toLowerCase().includes(searchTerm) ||
-          transaction.customerName?.toLowerCase().includes(searchTerm) ||
+          transaction.sender.name?.toLowerCase().includes(searchTerm) ||
+          transaction.receiver.name?.toLowerCase().includes(searchTerm) ||
           transaction.amount.toString().includes(searchTerm) ||
           transaction.agencyName.toLowerCase().includes(searchTerm);
         
@@ -29,6 +31,11 @@ export function useTransactionFilters(transactions: Transaction[]) {
 
       // Filtre de statut
       if (filters.status !== "all" && transaction.status !== filters.status) {
+        return false;
+      }
+
+      // Filtre de type
+      if (filters.type !== "all" && transaction.type !== filters.type) {
         return false;
       }
 
@@ -65,6 +72,7 @@ export function useTransactionFilters(transactions: Transaction[]) {
   const hasActiveFilters = Boolean(
     filters.search || 
     filters.status !== "all" || 
+    filters.type !== "all" || 
     filters.currency !== "all" || 
     filters.agency !== "all" || 
     filters.dateRange

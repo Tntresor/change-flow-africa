@@ -3,7 +3,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Transaction } from "@/types/transaction";
-import { Clock, CheckCircle, XCircle, WifiOff, Eye, MoreHorizontal } from "lucide-react";
+import { Clock, CheckCircle, XCircle, WifiOff, Eye, MoreHorizontal, ArrowRight, Building, Globe, Users } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -19,9 +19,18 @@ const statusConfig = {
   offline: { label: "Hors ligne", color: "bg-gray-100 text-gray-800", icon: WifiOff }
 };
 
+const typeConfig = {
+  internal_transfer: { label: "Transfert interne", color: "bg-blue-500", icon: Building },
+  international_transfer: { label: "Transfert international", color: "bg-purple-500", icon: Globe },
+  currency_exchange: { label: "Change", color: "bg-green-500", icon: ArrowRight },
+  payment: { label: "Paiement", color: "bg-orange-500", icon: Users }
+};
+
 export function TransactionTableRow({ transaction, onViewTransaction }: TransactionTableRowProps) {
   const status = statusConfig[transaction.status];
+  const type = typeConfig[transaction.type];
   const StatusIcon = status.icon;
+  const TypeIcon = type.icon;
 
   return (
     <TableRow key={transaction.id} className="hover:bg-gray-50">
@@ -37,29 +46,54 @@ export function TransactionTableRow({ transaction, onViewTransaction }: Transact
         </div>
       </TableCell>
       <TableCell>
-        <div className="font-medium">{transaction.agencyName}</div>
+        <div className="flex items-center gap-2">
+          <div className={`w-6 h-6 ${type.color} rounded-full flex items-center justify-center text-white`}>
+            <TypeIcon className="w-3 h-3" />
+          </div>
+          <span className="text-sm">{type.label}</span>
+        </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-2">
-          <div 
-            className={`w-6 h-6 ${transaction.category.color} rounded-full flex items-center justify-center text-white text-xs font-medium`}
-          >
-            {transaction.category.name.charAt(0)}
+        <div className="text-sm">
+          <div className="flex items-center gap-1">
+            <span className="font-medium">{transaction.origin.name}</span>
+            <ArrowRight className="w-3 h-3 text-gray-400" />
+            <span className="font-medium">{transaction.destination.name}</span>
           </div>
-          <span className="text-sm">{transaction.category.name}</span>
+          <div className="text-xs text-gray-500">
+            {transaction.origin.country} → {transaction.destination.country}
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="text-sm">
+          <div className="font-medium">{transaction.sender.name}</div>
+          <div className="text-xs text-gray-500 truncate">{transaction.sender.phone}</div>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="text-sm">
+          <div className="font-medium">{transaction.receiver.name}</div>
+          <div className="text-xs text-gray-500 truncate">{transaction.receiver.phone}</div>
         </div>
       </TableCell>
       <TableCell className="text-right">
         <div className="font-semibold">
           {transaction.amount.toLocaleString()} {transaction.fromCurrency}
         </div>
+        <div className="text-xs text-gray-500">
+          → {transaction.convertedAmount.toLocaleString()} {transaction.toCurrency}
+        </div>
       </TableCell>
       <TableCell className="text-right">
-        <div className="font-semibold">
-          {transaction.convertedAmount.toLocaleString()} {transaction.toCurrency}
-        </div>
         <div className="text-xs text-gray-500">
-          Taux: {transaction.exchangeRate}
+          Base: {transaction.exchangeRate.toFixed(4)}
+        </div>
+        <div className="text-xs text-orange-600">
+          +{transaction.spread.toFixed(4)}
+        </div>
+        <div className="font-semibold text-green-600">
+          = {transaction.finalRate.toFixed(4)}
         </div>
       </TableCell>
       <TableCell>
@@ -67,18 +101,6 @@ export function TransactionTableRow({ transaction, onViewTransaction }: Transact
           <StatusIcon className="w-3 h-3 mr-1" />
           {status.label}
         </Badge>
-      </TableCell>
-      <TableCell>
-        {transaction.customerName ? (
-          <div className="text-sm">
-            <div className="font-medium">{transaction.customerName}</div>
-            {transaction.customerPhone && (
-              <div className="text-gray-500">{transaction.customerPhone}</div>
-            )}
-          </div>
-        ) : (
-          <span className="text-gray-400">-</span>
-        )}
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-1">

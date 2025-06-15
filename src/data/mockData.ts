@@ -1,384 +1,158 @@
 
-import { Transaction, TransactionCategory, Agency } from '@/types/transaction';
-
-export const defaultCategories: TransactionCategory[] = [
-  { id: '1', name: 'Remittance', color: 'bg-blue-500', icon: 'Send', description: 'Envoi de fonds' },
-  { id: '2', name: 'Business', color: 'bg-green-500', icon: 'Building', description: 'Transactions commerciales' },
-  { id: '3', name: 'Tourism', color: 'bg-purple-500', icon: 'Plane', description: 'Change touristique' },
-  { id: '4', name: 'Investment', color: 'bg-orange-500', icon: 'TrendingUp', description: 'Investissements' },
-  { id: '5', name: 'Emergency', color: 'bg-red-500', icon: 'AlertTriangle', description: 'Urgences' },
-  { id: '6', name: 'Education', color: 'bg-indigo-500', icon: 'GraduationCap', description: 'Frais scolaires' }
-];
+import { Transaction, Agency, Partner, TransactionType, CommissionTier } from "@/types/transaction";
 
 export const mockAgencies: Agency[] = [
-  { id: '1', name: 'Agence Paris Centre', code: 'PAR01', country: 'France', isActive: true },
-  { id: '2', name: 'Agence Dakar Plateau', code: 'DAK01', country: 'Sénégal', isActive: true },
-  { id: '3', name: 'Agence Abidjan Cocody', code: 'ABJ01', country: 'Côte d\'Ivoire', isActive: true },
-  { id: '4', name: 'Agence Bamako Centre', code: 'BKO01', country: 'Mali', isActive: true },
-  { id: '5', name: 'Agence Londres West', code: 'LON01', country: 'Royaume-Uni', isActive: true },
-  { id: '6', name: 'Agence New York', code: 'NYC01', country: 'États-Unis', isActive: true },
-  { id: '7', name: 'Agence Casablanca', code: 'CAS01', country: 'Maroc', isActive: true },
-  { id: '8', name: 'Agence Dubai Mall', code: 'DXB01', country: 'EAU', isActive: true }
+  { id: "1", name: "Agence Paris Centre", code: "PAR01", country: "France", isActive: true },
+  { id: "2", name: "Agence Lyon", code: "LYO01", country: "France", isActive: true },
+  { id: "3", name: "Agence Marseille", code: "MAR01", country: "France", isActive: true },
+  { id: "4", name: "Agence Casablanca", code: "CAS01", country: "Maroc", isActive: true },
+  { id: "5", name: "Agence Dakar", code: "DAK01", country: "Sénégal", isActive: true },
 ];
 
-export const mockTransactions: Transaction[] = [
-  {
-    id: '1',
-    prefixId: 'TXN-2024-001',
-    amount: 500,
-    fromCurrency: 'EUR',
-    toCurrency: 'XOF',
-    exchangeRate: 655.957,
-    convertedAmount: 327978.5,
-    status: 'completed',
-    timestamp: new Date('2024-06-15T10:30:00'),
-    agencyId: '1',
-    agencyName: 'Agence Paris Centre',
-    category: defaultCategories[0],
-    customerName: 'Marie Dubois',
-    customerPhone: '+33123456789',
-    validationType: 'blocking',
-    isOffline: false
-  },
-  {
-    id: '2',
-    prefixId: 'TXN-2024-002',
-    amount: 1000,
-    fromCurrency: 'XOF',
-    toCurrency: 'EUR',
-    exchangeRate: 0.001524,
-    convertedAmount: 1.524,
-    status: 'pending',
-    timestamp: new Date('2024-06-15T11:15:00'),
-    agencyId: '2',
-    agencyName: 'Agence Dakar Plateau',
-    category: defaultCategories[1],
-    customerName: 'Amadou Ba',
-    customerPhone: '+221771234567',
-    validationType: 'warning',
-    isOffline: false
-  },
-  {
-    id: '3',
-    prefixId: 'TXN-2024-003',
-    amount: 750,
-    fromCurrency: 'USD',
-    toCurrency: 'XOF',
-    exchangeRate: 600.5,
-    convertedAmount: 450375,
-    status: 'offline',
-    timestamp: new Date('2024-06-15T09:45:00'),
-    agencyId: '3',
-    agencyName: 'Agence Abidjan Cocody',
-    category: defaultCategories[2],
-    customerName: 'Koffi Asante',
-    validationType: 'none',
-    isOffline: true
-  },
-  {
-    id: '4',
-    prefixId: 'TXN-2024-004',
-    amount: 2500,
-    fromCurrency: 'EUR',
-    toCurrency: 'MAD',
-    exchangeRate: 10.8,
-    convertedAmount: 27000,
-    status: 'completed',
-    timestamp: new Date('2024-06-14T14:20:00'),
-    agencyId: '7',
-    agencyName: 'Agence Casablanca',
-    category: defaultCategories[3],
-    customerName: 'Ahmed Benali',
-    customerPhone: '+212612345678',
-    validationType: 'none',
-    isOffline: false
-  },
-  {
-    id: '5',
-    prefixId: 'TXN-2024-005',
-    amount: 300,
-    fromCurrency: 'GBP',
-    toCurrency: 'EUR',
-    exchangeRate: 1.15,
-    convertedAmount: 345,
-    status: 'pending',
-    timestamp: new Date('2024-06-14T16:45:00'),
-    agencyId: '5',
-    agencyName: 'Agence Londres West',
-    category: defaultCategories[5],
-    customerName: 'John Smith',
-    customerPhone: '+44207123456',
-    validationType: 'warning',
-    isOffline: true
-  },
-  {
-    id: '6',
-    prefixId: 'TXN-2024-006',
-    amount: 5000,
-    fromCurrency: 'USD',
-    toCurrency: 'AED',
-    exchangeRate: 3.67,
-    convertedAmount: 18350,
-    status: 'completed',
-    timestamp: new Date('2024-06-14T08:30:00'),
-    agencyId: '8',
-    agencyName: 'Agence Dubai Mall',
-    category: defaultCategories[1],
-    customerName: 'Omar Al-Rashid',
-    customerPhone: '+971501234567',
-    validationType: 'blocking',
-    isOffline: false
-  },
-  {
-    id: '7',
-    prefixId: 'TXN-2024-007',
-    amount: 800,
-    fromCurrency: 'EUR',
-    toCurrency: 'XOF',
-    exchangeRate: 655.957,
-    convertedAmount: 524765.6,
-    status: 'rejected',
-    timestamp: new Date('2024-06-13T13:15:00'),
-    agencyId: '1',
-    agencyName: 'Agence Paris Centre',
-    category: defaultCategories[4],
-    customerName: 'Sophie Martin',
-    customerPhone: '+33145678912',
-    validationType: 'blocking',
-    isOffline: false
-  },
-  {
-    id: '8',
-    prefixId: 'TXN-2024-008',
-    amount: 1200,
-    fromCurrency: 'XOF',
-    toCurrency: 'USD',
-    exchangeRate: 0.00166,
-    convertedAmount: 1.99,
-    status: 'offline',
-    timestamp: new Date('2024-06-13T10:22:00'),
-    agencyId: '4',
-    agencyName: 'Agence Bamako Centre',
-    category: defaultCategories[0],
-    customerName: 'Mamadou Traoré',
-    customerPhone: '+22376543210',
-    validationType: 'none',
-    isOffline: true
-  },
-  {
-    id: '9',
-    prefixId: 'TXN-2024-009',
-    amount: 650,
-    fromCurrency: 'USD',
-    toCurrency: 'EUR',
-    exchangeRate: 0.92,
-    convertedAmount: 598,
-    status: 'pending',
-    timestamp: new Date('2024-06-13T17:40:00'),
-    agencyId: '6',
-    agencyName: 'Agence New York',
-    category: defaultCategories[2],
-    customerName: 'Emily Johnson',
-    customerPhone: '+12125551234',
-    validationType: 'warning',
-    isOffline: false
-  },
-  {
-    id: '10',
-    prefixId: 'TXN-2024-010',
-    amount: 450,
-    fromCurrency: 'EUR',
-    toCurrency: 'GBP',
-    exchangeRate: 0.87,
-    convertedAmount: 391.5,
-    status: 'completed',
-    timestamp: new Date('2024-06-12T12:10:00'),
-    agencyId: '5',
-    agencyName: 'Agence Londres West',
-    category: defaultCategories[1],
-    customerName: 'David Wilson',
-    customerPhone: '+44207987654',
-    validationType: 'none',
-    isOffline: false
-  },
-  {
-    id: '11',
-    prefixId: 'TXN-2024-011',
-    amount: 3000,
-    fromCurrency: 'AED',
-    toCurrency: 'USD',
-    exchangeRate: 0.272,
-    convertedAmount: 816,
-    status: 'offline',
-    timestamp: new Date('2024-06-12T09:35:00'),
-    agencyId: '8',
-    agencyName: 'Agence Dubai Mall',
-    category: defaultCategories[3],
-    customerName: 'Fatima Al-Zahra',
-    customerPhone: '+971504567890',
-    validationType: 'blocking',
-    isOffline: true
-  },
-  {
-    id: '12',
-    prefixId: 'TXN-2024-012',
-    amount: 220,
-    fromCurrency: 'MAD',
-    toCurrency: 'EUR',
-    exchangeRate: 0.093,
-    convertedAmount: 20.46,
-    status: 'pending',
-    timestamp: new Date('2024-06-11T15:25:00'),
-    agencyId: '7',
-    agencyName: 'Agence Casablanca',
-    category: defaultCategories[5],
-    customerName: 'Youssef Mansouri',
-    customerPhone: '+212698765432',
-    validationType: 'warning',
-    isOffline: true
-  },
-  {
-    id: '13',
-    prefixId: 'TXN-2024-013',
-    amount: 1800,
-    fromCurrency: 'USD',
-    toCurrency: 'XOF',
-    exchangeRate: 600.5,
-    convertedAmount: 1080900,
-    status: 'completed',
-    timestamp: new Date('2024-06-11T11:50:00'),
-    agencyId: '2',
-    agencyName: 'Agence Dakar Plateau',
-    category: defaultCategories[0],
-    customerName: 'Aïcha Diop',
-    customerPhone: '+221775432109',
-    validationType: 'none',
-    isOffline: false
-  },
-  {
-    id: '14',
-    prefixId: 'TXN-2024-014',
-    amount: 950,
-    fromCurrency: 'EUR',
-    toCurrency: 'USD',
-    exchangeRate: 1.09,
-    convertedAmount: 1035.5,
-    status: 'rejected',
-    timestamp: new Date('2024-06-10T14:15:00'),
-    agencyId: '1',
-    agencyName: 'Agence Paris Centre',
-    category: defaultCategories[4],
-    customerName: 'Pierre Dupont',
-    customerPhone: '+33156789123',
-    validationType: 'blocking',
-    isOffline: false
-  },
-  {
-    id: '15',
-    prefixId: 'TXN-2024-015',
-    amount: 4200,
-    fromCurrency: 'XOF',
-    toCurrency: 'EUR',
-    exchangeRate: 0.001524,
-    convertedAmount: 6.4,
-    status: 'offline',
-    timestamp: new Date('2024-06-10T08:20:00'),
-    agencyId: '3',
-    agencyName: 'Agence Abidjan Cocody',
-    category: defaultCategories[1],
-    customerName: 'N\'Goran Kouassi',
-    customerPhone: '+22505123456',
-    validationType: 'none',
-    isOffline: true
-  },
-  {
-    id: '16',
-    prefixId: 'TXN-2024-016',
-    amount: 700,
-    fromCurrency: 'GBP',
-    toCurrency: 'USD',
-    exchangeRate: 1.25,
-    convertedAmount: 875,
-    status: 'pending',
-    timestamp: new Date('2024-06-09T16:30:00'),
-    agencyId: '6',
-    agencyName: 'Agence New York',
-    category: defaultCategories[2],
-    customerName: 'Michael Brown',
-    customerPhone: '+12129876543',
-    validationType: 'warning',
-    isOffline: true
-  },
-  {
-    id: '17',
-    prefixId: 'TXN-2024-017',
-    amount: 1500,
-    fromCurrency: 'EUR',
-    toCurrency: 'MAD',
-    exchangeRate: 10.8,
-    convertedAmount: 16200,
-    status: 'completed',
-    timestamp: new Date('2024-06-09T13:45:00'),
-    agencyId: '7',
-    agencyName: 'Agence Casablanca',
-    category: defaultCategories[3],
-    customerName: 'Rachid El-Fassi',
-    customerPhone: '+212661234567',
-    validationType: 'none',
-    isOffline: false
-  },
-  {
-    id: '18',
-    prefixId: 'TXN-2024-018',
-    amount: 380,
-    fromCurrency: 'USD',
-    toCurrency: 'XOF',
-    exchangeRate: 600.5,
-    convertedAmount: 228190,
-    status: 'offline',
-    timestamp: new Date('2024-06-08T10:15:00'),
-    agencyId: '4',
-    agencyName: 'Agence Bamako Centre',
-    category: defaultCategories[5],
-    customerName: 'Fatoumata Keita',
-    customerPhone: '+22378901234',
-    validationType: 'blocking',
-    isOffline: true
-  },
-  {
-    id: '19',
-    prefixId: 'TXN-2024-019',
-    amount: 2200,
-    fromCurrency: 'AED',
-    toCurrency: 'EUR',
-    exchangeRate: 0.25,
-    convertedAmount: 550,
-    status: 'pending',
-    timestamp: new Date('2024-06-08T15:55:00'),
-    agencyId: '8',
-    agencyName: 'Agence Dubai Mall',
-    category: defaultCategories[0],
-    customerName: 'Khalid Al-Mansoori',
-    customerPhone: '+971502345678',
-    validationType: 'warning',
-    isOffline: false
-  },
-  {
-    id: '20',
-    prefixId: 'TXN-2024-020',
-    amount: 850,
-    fromCurrency: 'GBP',
-    toCurrency: 'XOF',
-    exchangeRate: 753.85,
-    convertedAmount: 640772.5,
-    status: 'completed',
-    timestamp: new Date('2024-06-07T12:25:00'),
-    agencyId: '5',
-    agencyName: 'Agence Londres West',
-    category: defaultCategories[4],
-    customerName: 'Sarah Thompson',
-    customerPhone: '+44207654321',
-    validationType: 'none',
-    isOffline: false
-  }
+export const mockPartners: Partner[] = [
+  { id: "p1", name: "Western Union", country: "Global", type: "money_transfer", isActive: true },
+  { id: "p2", name: "MoneyGram", country: "Global", type: "money_transfer", isActive: true },
+  { id: "p3", name: "Banque Populaire Maroc", country: "Maroc", type: "bank", isActive: true },
+  { id: "p4", name: "Orange Money", country: "Sénégal", type: "mobile_wallet", isActive: true },
 ];
+
+export const mockCommissionTiers: CommissionTier[] = [
+  { id: "t1", name: "Palier 1", minAmount: 0, maxAmount: 100, fixedAmount: 2, percentage: 1.5 },
+  { id: "t2", name: "Palier 2", minAmount: 100, maxAmount: 500, fixedAmount: 5, percentage: 1.2 },
+  { id: "t3", name: "Palier 3", minAmount: 500, maxAmount: 1000, fixedAmount: 8, percentage: 1.0 },
+  { id: "t4", name: "Palier 4", minAmount: 1000, fixedAmount: 15, percentage: 0.8 },
+];
+
+const transactionTypes: TransactionType[] = [
+  'internal_transfer',
+  'international_transfer', 
+  'currency_exchange',
+  'payment'
+];
+
+const currencies = ['EUR', 'USD', 'XOF', 'MAD', 'GBP'];
+
+function generateRandomTransaction(index: number): Transaction {
+  const type = transactionTypes[Math.floor(Math.random() * transactionTypes.length)];
+  const fromCurrency = currencies[Math.floor(Math.random() * currencies.length)];
+  let toCurrency = currencies[Math.floor(Math.random() * currencies.length)];
+  while (toCurrency === fromCurrency) {
+    toCurrency = currencies[Math.floor(Math.random() * currencies.length)];
+  }
+  
+  const amount = Math.floor(Math.random() * 2000) + 50;
+  const baseRate = Math.random() * 2 + 0.5;
+  const spread = Math.random() * 0.02; // Spread jusqu'à 2%
+  const finalRate = baseRate + spread;
+  const convertedAmount = amount * finalRate;
+  
+  // Calcul des commissions par palier
+  const tier = mockCommissionTiers.find(t => 
+    amount >= t.minAmount && (!t.maxAmount || amount <= t.maxAmount)
+  ) || mockCommissionTiers[0];
+  
+  const commissionAmount = tier.fixedAmount + (amount * tier.percentage / 100);
+  
+  const agency = mockAgencies[Math.floor(Math.random() * mockAgencies.length)];
+  const partner = mockPartners[Math.floor(Math.random() * mockPartners.length)];
+  
+  let origin, destination;
+  
+  switch (type) {
+    case 'internal_transfer':
+      origin = {
+        type: 'agency' as const,
+        id: agency.id,
+        name: agency.name,
+        country: agency.country,
+        code: agency.code
+      };
+      const destAgency = mockAgencies.find(a => a.id !== agency.id) || mockAgencies[0];
+      destination = {
+        type: 'agency' as const,
+        id: destAgency.id,
+        name: destAgency.name,
+        country: destAgency.country,
+        code: destAgency.code
+      };
+      break;
+      
+    case 'international_transfer':
+      origin = {
+        type: 'agency' as const,
+        id: agency.id,
+        name: agency.name,
+        country: agency.country,
+        code: agency.code
+      };
+      destination = {
+        type: 'partner' as const,
+        id: partner.id,
+        name: partner.name,
+        country: partner.country
+      };
+      break;
+      
+    default:
+      origin = {
+        type: 'agency' as const,
+        id: agency.id,
+        name: agency.name,
+        country: agency.country,
+        code: agency.code
+      };
+      destination = {
+        type: 'agency' as const,
+        id: agency.id,
+        name: agency.name,
+        country: agency.country,
+        code: agency.code
+      };
+  }
+
+  const status = ['pending', 'completed', 'rejected', 'offline'][Math.floor(Math.random() * 4)] as any;
+  
+  const senderNames = ['Jean Dupont', 'Marie Martin', 'Ahmed Ben Ali', 'Fatou Diop', 'Pierre Dubois'];
+  const receiverNames = ['Alice Johnson', 'Mohamed Benali', 'Aminata Sow', 'Carlos Silva', 'Anna Kowalski'];
+  
+  return {
+    id: `txn_${Date.now()}_${index}`,
+    type,
+    amount,
+    fromCurrency,
+    toCurrency,
+    exchangeRate: baseRate,
+    spread,
+    finalRate,
+    convertedAmount,
+    commission: {
+      amount: tier.fixedAmount,
+      percentage: tier.percentage,
+      tier,
+      totalCommission: commissionAmount
+    },
+    fees: Math.floor(Math.random() * 10) + 2,
+    status,
+    timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+    agencyId: agency.id,
+    agencyName: agency.name,
+    origin,
+    destination,
+    sender: {
+      name: senderNames[Math.floor(Math.random() * senderNames.length)],
+      phone: `+33 ${Math.floor(Math.random() * 900000000) + 100000000}`,
+      email: `sender${index}@email.com`
+    },
+    receiver: {
+      name: receiverNames[Math.floor(Math.random() * receiverNames.length)],
+      phone: `+${Math.floor(Math.random() * 900000000) + 100000000}`,
+      email: `receiver${index}@email.com`
+    },
+    validationType: ['blocking', 'warning', 'none'][Math.floor(Math.random() * 3)] as any,
+    prefixId: `${agency.code}_${Date.now().toString().slice(-6)}`,
+  };
+}
+
+export const mockTransactions: Transaction[] = Array.from({ length: 25 }, (_, index) => 
+  generateRandomTransaction(index)
+);
