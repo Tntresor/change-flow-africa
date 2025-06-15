@@ -15,18 +15,23 @@ export default function RatesPage() {
       </div>
 
       <Tabs defaultValue="rates" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="rates">Taux de Change</TabsTrigger>
-          <TabsTrigger value="commissions">Paliers de Commissions</TabsTrigger>
-          <TabsTrigger value="fees">Frais & Services</TabsTrigger>
+          <TabsTrigger value="tiers">Paliers</TabsTrigger>
+          <TabsTrigger value="commissions">Commissions</TabsTrigger>
+          <TabsTrigger value="fees">Frais</TabsTrigger>
         </TabsList>
         
         <TabsContent value="rates">
           <ExchangeRatesManager />
         </TabsContent>
         
-        <TabsContent value="commissions">
+        <TabsContent value="tiers">
           <CommissionTiersManager />
+        </TabsContent>
+        
+        <TabsContent value="commissions">
+          <CommissionsManager />
         </TabsContent>
         
         <TabsContent value="fees">

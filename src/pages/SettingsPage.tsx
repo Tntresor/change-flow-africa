@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { CurrencyManagement } from "@/components/settings/CurrencyManagement";
 import { 
   Settings, 
   Bell, 
@@ -69,6 +69,10 @@ export default function SettingsPage() {
     numberFormat: "1 234,56"
   });
 
+  // Nouveaux états pour les devises d'affichage
+  const [primaryCurrency, setPrimaryCurrency] = useState("XOF");
+  const [secondaryCurrency, setSecondaryCurrency] = useState("MAD");
+
   const updateNotification = (key: keyof NotificationSettings, value: boolean) => {
     setNotifications(prev => ({ ...prev, [key]: value }));
   };
@@ -98,10 +102,14 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
             Général
+          </TabsTrigger>
+          <TabsTrigger value="currencies" className="flex items-center gap-2">
+            <Globe className="w-4 h-4" />
+            Devises
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Bell className="w-4 h-4" />
@@ -238,6 +246,16 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Currencies Tab */}
+        <TabsContent value="currencies" className="space-y-6">
+          <CurrencyManagement
+            primaryCurrency={primaryCurrency}
+            secondaryCurrency={secondaryCurrency}
+            onPrimaryCurrencyChange={setPrimaryCurrency}
+            onSecondaryCurrencyChange={setSecondaryCurrency}
+          />
         </TabsContent>
 
         {/* Notifications */}
