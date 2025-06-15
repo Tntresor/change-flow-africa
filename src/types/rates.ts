@@ -42,4 +42,5 @@ export interface SpreadSettings {
   isActive: boolean;
 }
 
+// Add the CommissionSettings alias for backward compatibility
 export interface CommissionSettings extends CommissionTierSettings {}

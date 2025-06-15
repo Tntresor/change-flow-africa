@@ -7,19 +7,19 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CommissionSettings, FeeSettings } from "@/types/rates";
+import { CommissionTierSettings, FeeSettings } from "@/types/rates";
 import { mockCommissions, mockFees } from "@/data/ratesData";
 import { Edit, Save, X, Percent, DollarSign, Plus } from "lucide-react";
 
 export function CommissionsManager() {
-  const [commissions, setCommissions] = useState<CommissionSettings[]>(mockCommissions);
+  const [commissions, setCommissions] = useState<CommissionTierSettings[]>(mockCommissions);
   const [fees, setFees] = useState<FeeSettings[]>(mockFees);
   const [editingCommissionId, setEditingCommissionId] = useState<string | null>(null);
   const [editingFeeId, setEditingFeeId] = useState<string | null>(null);
-  const [editCommissionForm, setEditCommissionForm] = useState<Partial<CommissionSettings>>({});
+  const [editCommissionForm, setEditCommissionForm] = useState<Partial<CommissionTierSettings>>({});
   const [editFeeForm, setEditFeeForm] = useState<Partial<FeeSettings>>({});
 
-  const handleEditCommission = (commission: CommissionSettings) => {
+  const handleEditCommission = (commission: CommissionTierSettings) => {
     setEditingCommissionId(commission.id);
     setEditCommissionForm(commission);
   };

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
-import { Transaction } from "@/types/transaction";
+import { Transaction, TransactionCategory } from "@/types/transaction";
 import { mockExchangeRates } from "@/data/ratesData";
 import { Calculator, Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";

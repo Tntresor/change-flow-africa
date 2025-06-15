@@ -65,6 +65,8 @@ export const mockCommissionTiers: CommissionTierSettings[] = [
     currency: "EUR",
     isActive: true,
     order: 1,
+    type: 'percentage',
+    value: 1.5,
   },
   {
     id: "tier2", 
@@ -76,6 +78,8 @@ export const mockCommissionTiers: CommissionTierSettings[] = [
     currency: "EUR",
     isActive: true,
     order: 2,
+    type: 'percentage',
+    value: 1.2,
   },
   {
     id: "tier3",
@@ -87,6 +91,8 @@ export const mockCommissionTiers: CommissionTierSettings[] = [
     currency: "EUR",
     isActive: true,
     order: 3,
+    type: 'percentage',
+    value: 1.0,
   },
   {
     id: "tier4",
@@ -97,6 +103,8 @@ export const mockCommissionTiers: CommissionTierSettings[] = [
     currency: "EUR",
     isActive: true,
     order: 4,
+    type: 'percentage',
+    value: 0.8,
   },
 ];
 
