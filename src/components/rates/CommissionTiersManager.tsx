@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,19 +39,85 @@ export function CommissionTiersManager() {
   };
 
   const handleSave = () => {
-    if (editingId && editForm) {
-      setTiers(tiers.map(tier => 
-        tier.id === editingId 
-          ? { ...tier, ...editForm }
-          : tier
-      ));
-      setEditingId(null);
-      setEditForm({});
+    if (!editingId || !editForm) return;
+
+    const originalTier = tiers.find(t => t.id === editingId)!;
+    
+    // Create a temporary list with the updated tier to perform checks
+    let updatedTiers = tiers.map(tier =>
+      tier.id === editingId ? { ...tier, ...editForm } : tier
+    );
+
+    const editedTier = updatedTiers.find(t => t.id === editingId)!;
+
+    // --- Validation of user input ---
+    if (editedTier.maxAmount !== undefined && editedTier.minAmount >= editedTier.maxAmount) {
       toast({
-        title: "Palier mis à jour",
-        description: "Les modifications ont été sauvegardées",
+        title: "Erreur de validation",
+        description: "Le montant minimum doit être inférieur au montant maximum.",
+        variant: "destructive",
       });
+      return;
     }
+
+    const sortedTiersForValidation = [...updatedTiers].sort((a, b) => a.minAmount - b.minAmount);
+    const validationIndex = sortedTiersForValidation.findIndex(t => t.id === editingId);
+
+    if (validationIndex > 0) {
+      const prevTier = sortedTiersForValidation[validationIndex - 1];
+      if (prevTier.maxAmount !== undefined && editedTier.minAmount < prevTier.maxAmount) {
+        toast({
+          title: "Chevauchement de paliers",
+          description: `Le montant minimum se chevauche avec le palier précédent "${prevTier.name}".`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // --- Automatic Adjustment Logic ---
+    const maxAmountChanged = editedTier.maxAmount !== undefined && editedTier.maxAmount !== originalTier.maxAmount;
+
+    if (maxAmountChanged) {
+      // Sort to perform adjustments in the correct order
+      updatedTiers.sort((a, b) => a.minAmount - b.minAmount);
+      const tierIndex = updatedTiers.findIndex(t => t.id === editingId);
+      
+      let lastMaxAmount = editedTier.maxAmount!;
+      
+      for (let i = tierIndex + 1; i < updatedTiers.length; i++) {
+        const currentTier = updatedTiers[i];
+        const interval = (currentTier.maxAmount !== undefined && currentTier.maxAmount !== null)
+          ? currentTier.maxAmount - currentTier.minAmount
+          : undefined;
+
+        const newMinAmount = lastMaxAmount;
+        let newMaxAmount: number | undefined = undefined;
+
+        if (interval !== undefined) {
+          newMaxAmount = newMinAmount + interval;
+        }
+
+        updatedTiers[i] = {
+          ...currentTier,
+          minAmount: newMinAmount,
+          maxAmount: newMaxAmount,
+        };
+
+        if (newMaxAmount === undefined) {
+          break; // Last tier reached
+        }
+        lastMaxAmount = newMaxAmount;
+      }
+    }
+
+    setTiers(updatedTiers);
+    setEditingId(null);
+    setEditForm({});
+    toast({
+      title: "Paliers mis à jour",
+      description: "Les modifications ont été sauvegardées et les paliers suivants ajustés si nécessaire.",
+    });
   };
 
   const handleCancel = () => {
@@ -61,24 +126,44 @@ export function CommissionTiersManager() {
   };
 
   const addNewTier = () => {
-    const newTier: CommissionTierSettings = {
+    const sortedTiers = [...tiers].sort((a, b) => a.minAmount - b.minAmount);
+    const lastTier = sortedTiers.length > 0 ? sortedTiers[sortedTiers.length - 1] : null;
+
+    let newMinAmount = 0;
+    if (lastTier) {
+      if (lastTier.maxAmount !== undefined && lastTier.maxAmount !== null) {
+        newMinAmount = lastTier.maxAmount;
+      } else {
+        toast({
+          title: "Action impossible",
+          description: "Veuillez d'abord définir une borne maximale pour le dernier palier avant d'en ajouter un nouveau.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
+    const newTierData: CommissionTierSettings = {
       id: `tier_${Date.now()}`,
       name: `Nouveau palier ${tiers.length + 1}`,
-      minAmount: 0,
-      maxAmount: undefined,
+      minAmount: newMinAmount,
+      maxAmount: newMinAmount + 500, // Default interval
       fixedAmount: 0,
       percentage: 0,
       currency: "EUR",
       isActive: true,
-      order: tiers.length + 1,
+      order: (lastTier?.order ?? 0) + 1,
       type: 'percentage',
       value: 0,
       transactionType: selectedTransactionType === "all" ? undefined : selectedTransactionType
     };
-    setTiers([...tiers, newTier]);
+
+    setTiers([...tiers, newTierData]);
+    setEditingId(newTierData.id);
+    setEditForm(newTierData);
     toast({
       title: "Nouveau palier ajouté",
-      description: "Vous pouvez maintenant le configurer",
+      description: "Vous pouvez maintenant le configurer.",
     });
   };
 
@@ -147,7 +232,7 @@ export function CommissionTiersManager() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {filteredTiers.map((tier) => (
+          {filteredTiers.sort((a, b) => a.minAmount - b.minAmount).map((tier) => (
             <div key={tier.id} className="border rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
@@ -217,7 +302,7 @@ export function CommissionTiersManager() {
                       <Label>Montant min (€)</Label>
                       <Input
                         type="number"
-                        value={editForm.minAmount || ''}
+                        value={editForm.minAmount ?? ''}
                         onChange={(e) => setEditForm({...editForm, minAmount: parseFloat(e.target.value)})}
                       />
                     </div>
@@ -225,8 +310,9 @@ export function CommissionTiersManager() {
                       <Label>Montant max (€)</Label>
                       <Input
                         type="number"
-                        value={editForm.maxAmount || ''}
+                        value={editForm.maxAmount ?? ''}
                         onChange={(e) => setEditForm({...editForm, maxAmount: parseFloat(e.target.value) || undefined})}
+                        placeholder="Illimité"
                       />
                     </div>
                   </div>
@@ -236,7 +322,7 @@ export function CommissionTiersManager() {
                       <Input
                         type="number"
                         step="0.1"
-                        value={editForm.percentage || ''}
+                        value={editForm.percentage ?? ''}
                         onChange={(e) => setEditForm({...editForm, percentage: parseFloat(e.target.value)})}
                       />
                     </div>
@@ -245,7 +331,7 @@ export function CommissionTiersManager() {
                       <Input
                         type="number"
                         step="0.01"
-                        value={editForm.fixedAmount || ''}
+                        value={editForm.fixedAmount ?? ''}
                         onChange={(e) => setEditForm({...editForm, fixedAmount: parseFloat(e.target.value)})}
                       />
                     </div>
