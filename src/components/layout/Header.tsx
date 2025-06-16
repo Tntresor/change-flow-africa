@@ -4,10 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Bell, Plus, Settings, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { UserProfile } from "@/components/auth/UserProfile";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Header() {
   const navigate = useNavigate();
   const { title, description } = usePageTitle();
+  const { hasPermission } = useAuth();
 
   const handleNewTransaction = () => {
     navigate('/transactions?new=true');
@@ -33,14 +36,18 @@ export function Header() {
             <Bell className="w-4 h-4" />
             <span className="hidden sm:inline">Notifications</span>
           </Button>
-          <Button 
-            size="sm" 
-            className="gap-2 bg-blue-600 hover:bg-blue-700"
-            onClick={handleNewTransaction}
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Nouvelle transaction</span>
-          </Button>
+          
+          {hasPermission('create_transaction') && (
+            <Button 
+              size="sm" 
+              className="gap-2 bg-blue-600 hover:bg-blue-700"
+              onClick={handleNewTransaction}
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Nouvelle transaction</span>
+            </Button>
+          )}
+          
           <Button 
             variant="outline"
             size="sm"
@@ -50,13 +57,18 @@ export function Header() {
             <Users className="w-4 h-4" />
             <span className="hidden sm:inline">Clients</span>
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleSettings}
-          >
-            <Settings className="w-4 h-4" />
-          </Button>
+          
+          {hasPermission('manage_system') && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleSettings}
+            >
+              <Settings className="w-4 h-4" />
+            </Button>
+          )}
+          
+          <UserProfile />
         </div>
       </div>
     </header>

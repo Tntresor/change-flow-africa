@@ -1,9 +1,10 @@
-
 import { useState, useMemo } from "react";
 import { Transaction } from "@/types/transaction";
 import { FilterState } from "@/components/transactions/TransactionFilters";
+import { useAuth } from "@/hooks/useAuth";
 
 export function useTransactionFilters(transactions: Transaction[]) {
+  const { authState, canAccessAgency } = useAuth();
   const [filters, setFilters] = useState<FilterState>({
     search: "",
     status: "all",
@@ -14,7 +15,16 @@ export function useTransactionFilters(transactions: Transaction[]) {
   });
 
   const filteredTransactions = useMemo(() => {
-    return transactions.filter((transaction) => {
+    let filtered = transactions;
+
+    // Filtrer par agence selon les permissions de l'utilisateur
+    if (authState.user) {
+      filtered = filtered.filter(transaction => 
+        canAccessAgency(transaction.agencyId)
+      );
+    }
+
+    return filtered.filter((transaction) => {
       // Filtre de recherche
       if (filters.search) {
         const searchTerm = filters.search.toLowerCase();
@@ -67,7 +77,7 @@ export function useTransactionFilters(transactions: Transaction[]) {
 
       return true;
     });
-  }, [filters, transactions]);
+  }, [filters, transactions, authState.user, canAccessAgency]);
 
   const hasActiveFilters = Boolean(
     filters.search || 
