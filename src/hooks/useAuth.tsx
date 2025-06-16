@@ -10,11 +10,11 @@ const AuthContext = createContext<{
   hasPermission: (action: string) => boolean;
 } | null>(null);
 
-// Utilisateurs de test
+// Utilisateurs de test avec le domaine Koba
 const mockUsers: User[] = [
   {
     id: 'user_1',
-    email: 'marie.dubois@exchangehub.com',
+    email: 'marie.dubois@koba.com',
     firstName: 'Marie',
     lastName: 'Dubois',
     role: 'manager',
@@ -31,7 +31,7 @@ const mockUsers: User[] = [
   },
   {
     id: 'user_2',
-    email: 'pierre.martin@exchangehub.com',
+    email: 'pierre.martin@koba.com',
     firstName: 'Pierre',
     lastName: 'Martin',
     role: 'cashier',
@@ -48,7 +48,7 @@ const mockUsers: User[] = [
   },
   {
     id: 'user_3',
-    email: 'admin@exchangehub.com',
+    email: 'admin@koba.com',
     firstName: 'Jean',
     lastName: 'Administrateur',
     role: 'administrator',
@@ -66,7 +66,7 @@ const mockUsers: User[] = [
   },
   {
     id: 'user_4',
-    email: 'business@exchangehub.com',
+    email: 'business@koba.com',
     firstName: 'Sophie',
     lastName: 'Business',
     role: 'business_user',
@@ -75,6 +75,40 @@ const mockUsers: User[] = [
       { action: 'view_reports', granted: true },
       { action: 'view_all_agencies', granted: true },
       { action: 'view_global_stats', granted: true }
+    ]
+  },
+  {
+    id: 'user_5',
+    email: 'superviseur.douala@koba.com',
+    firstName: 'Paul',
+    lastName: 'Superviseur',
+    role: 'supervisor',
+    agencyId: '2',
+    agencyName: 'Agence Douala',
+    isActive: true,
+    permissions: [
+      { action: 'create_transaction', granted: true },
+      { action: 'approve_transaction', granted: true },
+      { action: 'manage_liquidity', granted: false },
+      { action: 'view_reports', granted: true },
+      { action: 'manage_employees', granted: true }
+    ]
+  },
+  {
+    id: 'user_6',
+    email: 'agent.casablanca@koba.com',
+    firstName: 'Fatima',
+    lastName: 'Agent',
+    role: 'agent',
+    agencyId: '3',
+    agencyName: 'Agence Casablanca',
+    isActive: true,
+    permissions: [
+      { action: 'create_transaction', granted: true },
+      { action: 'approve_transaction', granted: false },
+      { action: 'manage_liquidity', granted: false },
+      { action: 'view_reports', granted: false },
+      { action: 'manage_employees', granted: false }
     ]
   }
 ];

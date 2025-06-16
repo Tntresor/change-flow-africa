@@ -31,7 +31,7 @@ export function usePageTitle() {
   const pageInfo = getPageInfo();
 
   useEffect(() => {
-    document.title = `${pageInfo.title} - Money Transfer`;
+    document.title = `${pageInfo.title} - Koba`;
   }, [location.pathname, pageInfo.title]);
 
   return pageInfo;

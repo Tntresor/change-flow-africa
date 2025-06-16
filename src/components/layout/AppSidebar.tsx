@@ -29,15 +29,15 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const [companyName, setCompanyName] = useState("ExchangeHub");
+  const [companyName, setCompanyName] = useState("Koba");
 
   useEffect(() => {
     const loadCompanyName = () => {
       try {
-        const savedSettings = localStorage.getItem("exchangehub-general-settings");
+        const savedSettings = localStorage.getItem("koba-general-settings");
         if (savedSettings) {
           const settings = JSON.parse(savedSettings);
-          setCompanyName(settings.companyName || "ExchangeHub");
+          setCompanyName(settings.companyName || "Koba");
         }
       } catch (error) {
         console.error("Error loading company name", error);
@@ -48,7 +48,7 @@ export function AppSidebar() {
 
     // Listen for storage changes to update the company name in real-time
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "exchangehub-general-settings") {
+      if (e.key === "koba-general-settings") {
         loadCompanyName();
       }
     };
