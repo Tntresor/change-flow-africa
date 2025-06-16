@@ -34,10 +34,10 @@ export default function LoginPage() {
   };
 
   const testAccounts = [
-    { email: 'marie.dubois@exchangehub.com', role: 'Manager Agence Paris' },
-    { email: 'pierre.martin@exchangehub.com', role: 'Caissier Agence Paris' },
-    { email: 'admin@exchangehub.com', role: 'Administrateur Siège' },
-    { email: 'business@exchangehub.com', role: 'Utilisateur Métier Siège' }
+    { email: 'marie.dubois@koba.com', role: 'Manager Agence Paris' },
+    { email: 'pierre.martin@koba.com', role: 'Caissier Agence Paris' },
+    { email: 'admin@koba.com', role: 'Administrateur Siège' },
+    { email: 'business@koba.com', role: 'Utilisateur Métier Siège' }
   ];
 
   return (
@@ -47,7 +47,7 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <Building2 className="h-12 w-12 text-blue-600" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">ExchangeHub</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Koba</h2>
           <p className="mt-2 text-gray-600">Connectez-vous à votre espace</p>
         </div>
 
@@ -68,7 +68,7 @@ export default function LoginPage() {
                   value={credentials.email}
                   onChange={(e) => setCredentials(prev => ({ ...prev, email: e.target.value }))}
                   required
-                  placeholder="votre.email@exchangehub.com"
+                  placeholder="votre.email@koba.com"
                 />
               </div>
 
