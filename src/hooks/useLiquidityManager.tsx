@@ -2,9 +2,11 @@
 import { useState, useEffect } from "react";
 import { mockAgencyLiquidity } from "@/data/mockLiquidityData";
 import { AgencyLiquidity } from "@/types/liquidity";
+import { Transaction } from "@/types/transaction";
 import { usePoolLiquidity } from "./usePoolLiquidity";
 import { useLiquidityTransfers } from "./useLiquidityTransfers";
 import { useCashOperations } from "./useCashOperations";
+import { updateCurrencyBalance } from "@/utils/liquidityUtils";
 
 export function useLiquidityManager() {
   const [agencyLiquidity, setAgencyLiquidity] = useState<AgencyLiquidity[]>(mockAgencyLiquidity);
@@ -41,6 +43,32 @@ export function useLiquidityManager() {
     executeTransfer(transferId, agencyLiquidity, setAgencyLiquidity);
   };
 
+  const updateBalanceAfterTransaction = (transaction: Transaction) => {
+    console.log('Updating balance after transaction:', transaction);
+    
+    setAgencyLiquidity(prev => prev.map(agency => {
+      if (agency.agencyId === transaction.agencyId) {
+        return {
+          ...agency,
+          balances: agency.balances.map(balance => {
+            // Update balance for the source currency (subtract amount + fees)
+            if (balance.currency === transaction.fromCurrency) {
+              const totalDeduction = transaction.amount + transaction.fees;
+              return updateCurrencyBalance(balance, -totalDeduction);
+            }
+            // Update balance for the destination currency (add converted amount)
+            if (balance.currency === transaction.toCurrency) {
+              return updateCurrencyBalance(balance, transaction.convertedAmount);
+            }
+            return balance;
+          }),
+          lastUpdated: new Date()
+        };
+      }
+      return agency;
+    }));
+  };
+
   return {
     agencyLiquidity,
     poolLiquidity,
@@ -48,6 +76,7 @@ export function useLiquidityManager() {
     cashOperations,
     processCashOperation: handleCashOperation,
     transferLiquidity: handleTransferLiquidity,
-    executeTransfer: handleExecuteTransfer
+    executeTransfer: handleExecuteTransfer,
+    updateBalanceAfterTransaction
   };
 }
