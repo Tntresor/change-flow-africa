@@ -20,7 +20,8 @@ export function useTransactionCalculation(watchedValues: TransactionFormData) {
       rate => rate.fromCurrency === fromCurrency && rate.toCurrency === toCurrency && rate.isActive
     );
 
-    const currentRate = manualRateEnabled ? manualRate : (exchangeRate?.finalRate || 1);
+    // Utiliser le taux Ask (nous vendons la devise cible au client)
+    const currentRate = manualRateEnabled ? manualRate : (exchangeRate?.askRate || 1);
     
     // Calculer la commission
     const activeCommission = mockCommissions.find(c => c.isActive);
@@ -33,13 +34,13 @@ export function useTransactionCalculation(watchedValues: TransactionFormData) {
     const activeFees = mockFees.filter(f => f.isActive);
     const totalFees = manualFees || activeFees.reduce((sum, fee) => sum + fee.amount, 0);
 
-    // Montant final
+    // Montant final après déduction des commissions et frais, puis conversion
     const convertedAmount = (amount - commission - totalFees) * currentRate;
     setCalculatedAmount(convertedAmount);
 
-    // Mettre à jour le taux manuel si pas activé
+    // Mettre à jour le taux manuel si pas activé (utiliser le taux Ask)
     if (!manualRateEnabled && exchangeRate) {
-      setManualRate(exchangeRate.finalRate);
+      setManualRate(exchangeRate.askRate);
     }
   };
 

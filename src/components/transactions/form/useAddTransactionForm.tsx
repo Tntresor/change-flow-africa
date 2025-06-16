@@ -55,17 +55,23 @@ export function useAddTransactionForm({ onSuccess }: UseAddTransactionFormProps)
       throw new Error("Catégorie ou agence non trouvée");
     }
 
+    const exchangeRateData = mockExchangeRates.find(
+      rate => rate.fromCurrency === data.fromCurrency && rate.toCurrency === data.toCurrency
+    );
+
+    // Utiliser le taux Ask pour la transaction (nous vendons la devise cible)
+    const appliedRate = manualRateEnabled ? manualRate : (exchangeRateData?.askRate || 1);
+    const totalSpread = exchangeRateData?.totalSpread || 0;
+
     return {
       id: `txn_${Date.now()}`,
       type: 'currency_exchange',
       amount: data.amount,
       fromCurrency: data.fromCurrency,
       toCurrency: data.toCurrency,
-      exchangeRate: manualRateEnabled ? manualRate : (mockExchangeRates.find(
-        rate => rate.fromCurrency === data.fromCurrency && rate.toCurrency === data.toCurrency
-      )?.finalRate || 1),
-      spread: 0,
-      finalRate: manualRate,
+      exchangeRate: exchangeRateData?.baseRate || appliedRate, // Taux de base pour référence
+      spread: totalSpread,
+      finalRate: appliedRate, // Taux réellement appliqué (Ask)
       convertedAmount: calculatedAmount,
       commission: {
         amount: manualCommission,

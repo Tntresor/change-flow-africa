@@ -3,9 +3,10 @@ export interface ExchangeRateSettings {
   id: string;
   fromCurrency: string;
   toCurrency: string;
-  baseRate: number;
-  spread: number;
-  finalRate: number;
+  baseRate: number; // Taux mid-market (interbancaire)
+  totalSpread: number; // Spread total en valeur absolue
+  bidRate: number; // Taux d'achat (baseRate - spread/2)
+  askRate: number; // Taux de vente (baseRate + spread/2)
   isActive: boolean;
   lastUpdated: Date;
 }

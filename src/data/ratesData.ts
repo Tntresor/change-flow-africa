@@ -1,14 +1,22 @@
-
 import { ExchangeRateSettings, CommissionTierSettings, FeeSettings } from "@/types/rates";
+
+// Fonction utilitaire pour calculer bid/ask à partir du taux de base et du spread total
+const calculateBidAskRates = (baseRate: number, totalSpread: number) => {
+  const halfSpread = totalSpread / 2;
+  return {
+    bidRate: baseRate - halfSpread,
+    askRate: baseRate + halfSpread
+  };
+};
 
 export const mockExchangeRates: ExchangeRateSettings[] = [
   {
     id: "1",
     fromCurrency: "EUR",
     toCurrency: "USD",
-    baseRate: 1.0850,
-    spread: 0.0050, // Spread positif = taux final plus avantageux pour nous
-    finalRate: 1.0900, // baseRate + spread
+    baseRate: 1.0850, // Taux mid-market interbancaire
+    totalSpread: 0.0100, // Spread total de 100 pips
+    ...calculateBidAskRates(1.0850, 0.0100),
     isActive: true,
     lastUpdated: new Date(),
   },
@@ -16,9 +24,9 @@ export const mockExchangeRates: ExchangeRateSettings[] = [
     id: "2", 
     fromCurrency: "USD",
     toCurrency: "EUR",
-    baseRate: 0.9200,
-    spread: 0.0045, // Spread positif
-    finalRate: 0.9245, // baseRate + spread
+    baseRate: 0.9200, // Taux mid-market interbancaire
+    totalSpread: 0.0090, // Spread total de 90 pips
+    ...calculateBidAskRates(0.9200, 0.0090),
     isActive: true,
     lastUpdated: new Date(),
   },
@@ -26,9 +34,9 @@ export const mockExchangeRates: ExchangeRateSettings[] = [
     id: "3",
     fromCurrency: "EUR",
     toCurrency: "XOF",
-    baseRate: 655.957,
-    spread: 8.0, // Spread plus important pour les devises africaines
-    finalRate: 663.957, // baseRate + spread
+    baseRate: 655.957, // Taux mid-market interbancaire
+    totalSpread: 16.0, // Spread plus important pour les devises africaines
+    ...calculateBidAskRates(655.957, 16.0),
     isActive: true,
     lastUpdated: new Date(),
   },
@@ -36,9 +44,9 @@ export const mockExchangeRates: ExchangeRateSettings[] = [
     id: "4",
     fromCurrency: "EUR",
     toCurrency: "MAD",
-    baseRate: 10.85,
-    spread: 0.20, // Spread avantageux
-    finalRate: 11.05, // baseRate + spread
+    baseRate: 10.85, // Taux mid-market interbancaire
+    totalSpread: 0.40, // Spread total
+    ...calculateBidAskRates(10.85, 0.40),
     isActive: true,
     lastUpdated: new Date(),
   },
@@ -46,9 +54,9 @@ export const mockExchangeRates: ExchangeRateSettings[] = [
     id: "5",
     fromCurrency: "USD",
     toCurrency: "MAD",
-    baseRate: 9.95,
-    spread: 0.15, // Spread positif
-    finalRate: 10.10, // baseRate + spread
+    baseRate: 9.95, // Taux mid-market interbancaire
+    totalSpread: 0.30, // Spread total
+    ...calculateBidAskRates(9.95, 0.30),
     isActive: true,
     lastUpdated: new Date(),
   },
