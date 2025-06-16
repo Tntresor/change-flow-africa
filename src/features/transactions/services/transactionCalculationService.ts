@@ -1,13 +1,22 @@
 
-import { ExchangeRateService } from "@/features/exchange-rates/services/exchangeRateService";
 import { ExchangeRateSettings, CommissionTierSettings, FeeSettings } from "@/types/rates";
+import { ExchangeRateService } from "@/features/exchange-rates/services/exchangeRateService";
+import { CommissionService, CommissionCalculation } from "./commissionService";
+import { FeeService, FeeCalculation } from "./feeService";
 
 export interface TransactionCalculationResult {
-  convertedAmount: number;
-  commission: number;
-  fees: number;
-  finalAmount: number;
   exchangeRate: number;
+  convertedAmount: number;
+  commission: CommissionCalculation;
+  fees: FeeCalculation;
+  totalCost: number;
+  netAmount: number;
+}
+
+export interface TransactionCalculationOverrides {
+  rate?: number;
+  commission?: number;
+  fees?: number;
 }
 
 export class TransactionCalculationService {
@@ -18,40 +27,127 @@ export class TransactionCalculationService {
     exchangeRates: ExchangeRateSettings[],
     commissions: CommissionTierSettings[],
     fees: FeeSettings[],
-    manualOverrides?: {
-      rate?: number;
-      commission?: number;
-      fees?: number;
-    }
+    overrides: TransactionCalculationOverrides = {},
+    transactionType: string = "currency_exchange"
   ): TransactionCalculationResult {
-    // Calcul du taux de change
-    const exchangeRate = manualOverrides?.rate || 
-      ExchangeRateService.calculateExchangeRate(fromCurrency, toCurrency, exchangeRates)?.applicableRate || 
-      1;
+    // 1. Calcul du taux de change
+    const exchangeRate = this.calculateExchangeRate(
+      fromCurrency,
+      toCurrency,
+      exchangeRates,
+      overrides.rate
+    );
 
-    // Calcul de la commission
-    let commission = manualOverrides?.commission || 0;
-    if (!manualOverrides?.commission) {
-      const activeCommission = commissions.find(c => c.isActive);
-      if (activeCommission) {
-        commission = (amount * activeCommission.percentage / 100) + activeCommission.fixedAmount;
-      }
-    }
+    // 2. Conversion du montant
+    const convertedAmount = amount * exchangeRate;
 
-    // Calcul des frais
-    const totalFees = manualOverrides?.fees || 
-      fees.filter(f => f.isActive).reduce((sum, fee) => sum + fee.amount, 0);
+    // 3. Calcul des commissions
+    const commission = this.calculateCommission(
+      amount,
+      commissions,
+      transactionType,
+      overrides.commission
+    );
 
-    // Montant après déduction des commissions et frais, puis conversion
-    const netAmount = amount - commission - totalFees;
-    const convertedAmount = netAmount * exchangeRate;
+    // 4. Calcul des frais
+    const feeCalculation = this.calculateFees(
+      fees,
+      transactionType,
+      overrides.fees
+    );
+
+    // 5. Calculs finaux
+    const totalCost = commission.totalCommission + feeCalculation.totalFees;
+    const netAmount = convertedAmount - totalCost;
 
     return {
+      exchangeRate,
       convertedAmount,
       commission,
-      fees: totalFees,
-      finalAmount: convertedAmount,
-      exchangeRate
+      fees: feeCalculation,
+      totalCost,
+      netAmount
+    };
+  }
+
+  private static calculateExchangeRate(
+    fromCurrency: string,
+    toCurrency: string,
+    exchangeRates: ExchangeRateSettings[],
+    manualRate?: number
+  ): number {
+    if (manualRate !== undefined) {
+      return manualRate;
+    }
+
+    const rateCalculation = ExchangeRateService.calculateExchangeRate(
+      fromCurrency,
+      toCurrency,
+      exchangeRates
+    );
+
+    return rateCalculation?.applicableRate || 0;
+  }
+
+  private static calculateCommission(
+    amount: number,
+    commissions: CommissionTierSettings[],
+    transactionType: string,
+    manualCommission?: number
+  ): CommissionCalculation {
+    if (manualCommission !== undefined) {
+      return {
+        amount: manualCommission,
+        percentage: 0,
+        tier: CommissionService['createDefaultTier'](),
+        totalCommission: manualCommission
+      };
+    }
+
+    return CommissionService.calculateCommission(amount, commissions, transactionType);
+  }
+
+  private static calculateFees(
+    fees: FeeSettings[],
+    transactionType: string,
+    manualFees?: number
+  ): FeeCalculation {
+    if (manualFees !== undefined) {
+      return {
+        fees: [],
+        totalFees: manualFees
+      };
+    }
+
+    return FeeService.calculateFees(fees, transactionType);
+  }
+
+  static validateTransactionInputs(
+    amount: number,
+    fromCurrency: string,
+    toCurrency: string
+  ): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    if (!amount || amount <= 0) {
+      errors.push("Le montant doit être supérieur à 0");
+    }
+
+    if (!fromCurrency) {
+      errors.push("La devise source est obligatoire");
+    }
+
+    if (!toCurrency) {
+      errors.push("La devise de destination est obligatoire");
+    }
+
+    if (fromCurrency === toCurrency) {
+      errors.push("Les devises source et destination doivent être différentes");
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
     };
   }
 }

@@ -2,32 +2,57 @@
 import { useState, useEffect } from "react";
 import { TransactionFormData } from "@/components/transactions/form/TransactionFormData";
 import { TransactionCalculationService } from "../services/transactionCalculationService";
-import { mockExchangeRates, mockCommissions, mockFees } from "@/data/ratesData";
+import { mockExchangeRates } from "@/data/ratesData";
+import { useCommissionCalculation } from "./useCommissionCalculation";
 
 export function useTransactionCalculation(watchedValues: TransactionFormData) {
   const [manualRateEnabled, setManualRateEnabled] = useState(false);
   const [manualRate, setManualRate] = useState<number>(0);
-  const [manualCommission, setManualCommission] = useState<number>(0);
-  const [manualFees, setManualFees] = useState<number>(0);
   const [calculatedAmount, setCalculatedAmount] = useState<number>(0);
 
+  const {
+    commissionCalculation,
+    feeCalculation,
+    totalCost,
+    manualCommission,
+    setManualCommission,
+    manualFees,
+    setManualFees,
+    useManualCommission,
+    setUseManualCommission,
+    useManualFees,
+    setUseManualFees
+  } = useCommissionCalculation(watchedValues.amount || 0, watchedValues.type || "currency_exchange");
+
   const calculateTransaction = () => {
-    const { amount, fromCurrency, toCurrency } = watchedValues;
+    const { amount, fromCurrency, toCurrency, type } = watchedValues;
     
     if (!amount || !fromCurrency || !toCurrency) return;
+
+    const validation = TransactionCalculationService.validateTransactionInputs(
+      amount,
+      fromCurrency,
+      toCurrency
+    );
+
+    if (!validation.isValid) {
+      console.warn("Validation errors:", validation.errors);
+      return;
+    }
 
     const result = TransactionCalculationService.calculateTransaction(
       amount,
       fromCurrency,
       toCurrency,
       mockExchangeRates,
-      mockCommissions,
-      mockFees,
+      [], // commissions calculées séparément
+      [], // frais calculés séparément
       {
         rate: manualRateEnabled ? manualRate : undefined,
-        commission: manualCommission || undefined,
-        fees: manualFees || undefined
-      }
+        commission: useManualCommission ? manualCommission : undefined,
+        fees: useManualFees ? manualFees : undefined
+      },
+      type || "currency_exchange"
     );
 
     setCalculatedAmount(result.convertedAmount);
@@ -40,18 +65,40 @@ export function useTransactionCalculation(watchedValues: TransactionFormData) {
 
   useEffect(() => {
     calculateTransaction();
-  }, [watchedValues, manualRateEnabled, manualRate, manualCommission, manualFees]);
+  }, [
+    watchedValues, 
+    manualRateEnabled, 
+    manualRate, 
+    useManualCommission,
+    manualCommission,
+    useManualFees,
+    manualFees
+  ]);
 
   return {
+    // Taux de change
     manualRateEnabled,
     setManualRateEnabled,
     manualRate,
     setManualRate,
+    
+    // Commissions
+    commissionCalculation,
     manualCommission,
     setManualCommission,
+    useManualCommission,
+    setUseManualCommission,
+    
+    // Frais
+    feeCalculation,
     manualFees,
     setManualFees,
+    useManualFees,
+    setUseManualFees,
+    
+    // Résultats
     calculatedAmount,
+    totalCost,
     calculateTransaction
   };
 }
