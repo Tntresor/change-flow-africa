@@ -1,13 +1,10 @@
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Edit, Save, X } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { Edit3, Save, X } from "lucide-react";
 import { ExchangeRateSettings } from "@/types/rates";
-import { ExchangeRateEditForm } from "./ExchangeRateEditForm";
 import { ExchangeRateDisplayInfo } from "./ExchangeRateDisplayInfo";
+import { ExchangeRateEditForm } from "./ExchangeRateEditForm";
 
 interface ExchangeRateItemProps {
   rate: ExchangeRateSettings;
@@ -35,30 +32,37 @@ export function ExchangeRateItem({
   const spreadPercentage = rate.baseRate > 0 ? (rate.totalSpread / rate.baseRate) * 100 : 0;
 
   return (
-    <div className="border rounded-lg p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <Badge variant="outline" className="font-mono">
+    <div className={`p-4 border rounded-lg ${rate.isActive ? 'bg-white' : 'bg-gray-50'}`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <h3 className="text-lg font-semibold">
             {rate.fromCurrency} → {rate.toCurrency}
-          </Badge>
+          </h3>
           <Switch
             checked={rate.isActive}
             onCheckedChange={() => onToggleActive(rate.id)}
           />
+          <span className="text-sm text-gray-500">
+            {rate.isActive ? 'Actif' : 'Inactif'}
+          </span>
         </div>
+        
         <div className="flex items-center gap-2">
           {isEditing ? (
             <>
-              <Button size="sm" onClick={onSave}>
-                <Save className="w-4 h-4" />
+              <Button size="sm" onClick={onSave} className="gap-1">
+                <Save className="w-3 h-3" />
+                Sauvegarder
               </Button>
-              <Button size="sm" variant="outline" onClick={onCancel}>
-                <X className="w-4 h-4" />
+              <Button size="sm" variant="outline" onClick={onCancel} className="gap-1">
+                <X className="w-3 h-3" />
+                Annuler
               </Button>
             </>
           ) : (
-            <Button size="sm" variant="outline" onClick={() => onEdit(rate)}>
-              <Edit className="w-4 h-4" />
+            <Button size="sm" variant="outline" onClick={() => onEdit(rate)} className="gap-1">
+              <Edit3 className="w-3 h-3" />
+              Modifier
             </Button>
           )}
         </div>
@@ -71,12 +75,14 @@ export function ExchangeRateItem({
           calculateBidAskFromInputs={calculateBidAskFromInputs}
         />
       ) : (
-        <ExchangeRateDisplayInfo rate={rate} spreadPercentage={spreadPercentage} />
+        <ExchangeRateDisplayInfo
+          rate={rate}
+          spreadPercentage={spreadPercentage}
+        />
       )}
 
-      <div className="text-xs text-gray-500 mt-2 flex justify-between">
-        <span>Dernière mise à jour: {format(rate.lastUpdated, "PPp", { locale: fr })}</span>
-        <span>Différence Bid/Ask: {(rate.askRate - rate.bidRate).toFixed(4)}</span>
+      <div className="mt-3 text-xs text-gray-500">
+        Dernière mise à jour: {rate.lastUpdated.toLocaleString('fr-FR')}
       </div>
     </div>
   );
