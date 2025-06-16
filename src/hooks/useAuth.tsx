@@ -171,15 +171,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const canAccessAgency = (agencyId: string): boolean => {
-    if (!authState.user) return false;
+    console.log('🔍 canAccessAgency called with:', { agencyId, user: authState.user });
+    
+    if (!authState.user) {
+      console.log('❌ No user found, denying access');
+      return false;
+    }
+    
+    console.log('👤 Current user details:', {
+      role: authState.user.role,
+      agencyId: authState.user.agencyId,
+      permissions: authState.user.permissions
+    });
     
     // Administrateur et utilisateur métier peuvent voir toutes les agences
     if (authState.user.role === 'administrator' || authState.user.role === 'business_user') {
-      return authState.user.permissions.some(p => p.action === 'view_all_agencies' && p.granted);
+      const hasViewAllPermission = authState.user.permissions.some(p => p.action === 'view_all_agencies' && p.granted);
+      console.log('🔓 Admin/Business user check:', { hasViewAllPermission });
+      return hasViewAllPermission;
     }
     
     // Les autres utilisateurs ne peuvent voir que leur agence
-    return authState.user.agencyId === agencyId;
+    const canAccess = authState.user.agencyId === agencyId;
+    console.log('🏢 Agency access check:', { 
+      userAgencyId: authState.user.agencyId, 
+      requestedAgencyId: agencyId, 
+      canAccess 
+    });
+    
+    return canAccess;
   };
 
   const hasPermission = (action: string): boolean => {

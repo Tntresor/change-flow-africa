@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { Transaction } from "@/types/transaction";
 import { FilterState } from "@/components/transactions/TransactionFilters";
@@ -15,13 +16,35 @@ export function useTransactionFilters(transactions: Transaction[]) {
   });
 
   const filteredTransactions = useMemo(() => {
+    console.log('🔄 Starting transaction filtering with:', {
+      totalTransactions: transactions.length,
+      currentUser: authState.user ? {
+        name: `${authState.user.firstName} ${authState.user.lastName}`,
+        role: authState.user.role,
+        agencyId: authState.user.agencyId,
+        agencyName: authState.user.agencyName
+      } : null
+    });
+
     let filtered = transactions;
 
     // Filtrer par agence selon les permissions de l'utilisateur
     if (authState.user) {
-      filtered = filtered.filter(transaction => 
-        canAccessAgency(transaction.agencyId)
-      );
+      console.log('🏢 Applying agency filtering...');
+      
+      const beforeAgencyFilter = filtered.length;
+      filtered = filtered.filter(transaction => {
+        const canAccess = canAccessAgency(transaction.agencyId);
+        console.log('Transaction agency check:', {
+          transactionId: transaction.id,
+          transactionAgencyId: transaction.agencyId,
+          transactionAgencyName: transaction.agencyName,
+          canAccess
+        });
+        return canAccess;
+      });
+      
+      console.log(`📊 Agency filter results: ${beforeAgencyFilter} → ${filtered.length} transactions`);
     }
 
     return filtered.filter((transaction) => {
