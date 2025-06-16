@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { AgencyLiquidity, PoolLiquidity, LiquidityTransfer, CurrencyBalance } from "@/types/liquidity";
 import { Transaction } from "@/types/transaction";
@@ -213,7 +214,9 @@ export function useLiquidityManager() {
       return;
     }
 
-    // Create the operation record
+    console.log('Processing cash operation:', { agencyId, operation });
+
+    // Create the operation record first
     const newOperation: CashOperation = {
       id: `cash_${Date.now()}`,
       ...operation,
@@ -222,37 +225,63 @@ export function useLiquidityManager() {
       agencyName: agency.agencyName
     };
 
+    console.log('New cash operation created:', newOperation);
+
     // Update the agency's balance
-    setAgencyLiquidity(prev => prev.map(ag => {
-      if (ag.agencyId === agencyId) {
-        return {
-          ...ag,
-          balances: ag.balances.map(balance => {
+    setAgencyLiquidity(prev => {
+      const updated = prev.map(ag => {
+        if (ag.agencyId === agencyId) {
+          const updatedBalances = ag.balances.map(balance => {
             if (balance.currency === operation.currency) {
               const amountChange = operation.type === 'cash_in' ? operation.amount : -operation.amount;
               const newBalance = balance.balance + amountChange;
+              const newAvailable = newBalance - balance.reservedAmount;
+              const newStatus = getBalanceStatus(newBalance, balance.minThreshold, balance.maxThreshold);
+              
+              console.log(`Updating balance for ${balance.currency}:`, {
+                oldBalance: balance.balance,
+                amountChange,
+                newBalance,
+                newAvailable,
+                newStatus
+              });
+
               return {
                 ...balance,
                 balance: newBalance,
-                availableAmount: newBalance - balance.reservedAmount,
-                status: getBalanceStatus(newBalance, balance.minThreshold, balance.maxThreshold)
+                availableAmount: newAvailable,
+                status: newStatus
               };
             }
             return balance;
-          }),
-          lastUpdated: new Date()
-        };
-      }
-      return ag;
-    }));
+          });
+
+          return {
+            ...ag,
+            balances: updatedBalances,
+            lastUpdated: new Date()
+          };
+        }
+        return ag;
+      });
+      
+      console.log('Agency liquidity updated:', updated.find(a => a.agencyId === agencyId));
+      return updated;
+    });
 
     // Add to operations history
-    setCashOperations(prev => [newOperation, ...prev]);
+    setCashOperations(prev => {
+      const updated = [newOperation, ...prev];
+      console.log('Cash operations updated:', updated);
+      return updated;
+    });
 
     toast({
       title: `${operation.type === 'cash_in' ? 'Réapprovisionnement' : 'Collecte'} effectué`,
       description: `${operation.amount} ${operation.currency} - ${agency.agencyName}`,
     });
+
+    console.log('Cash operation processing completed');
   };
 
   const getBalanceStatus = (balance: number, minThreshold: number, maxThreshold: number): 'critical' | 'low' | 'normal' | 'high' => {
