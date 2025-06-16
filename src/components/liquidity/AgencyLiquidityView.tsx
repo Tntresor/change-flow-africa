@@ -9,10 +9,32 @@ import { AlertCircle, CheckCircle, AlertTriangle, XCircle, Plus } from "lucide-r
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { CashOperationForm } from "./CashOperationForm";
 import { CashOperationsList } from "./CashOperationsList";
-import { useLiquidityManager } from "@/hooks/useLiquidityManager";
+
+interface CashOperation {
+  id: string;
+  type: 'cash_in' | 'cash_out';
+  currency: string;
+  amount: number;
+  reason: string;
+  reference: string;
+  timestamp: Date;
+  agencyId: string;
+  agencyName: string;
+}
 
 interface AgencyLiquidityViewProps {
   agencies: AgencyLiquidity[];
+  cashOperations: CashOperation[];
+  onCashOperation: (
+    agencyId: string,
+    operation: {
+      type: 'cash_in' | 'cash_out';
+      currency: string;
+      amount: number;
+      reason: string;
+      reference: string;
+    }
+  ) => void;
 }
 
 const statusConfig = {
@@ -22,10 +44,9 @@ const statusConfig = {
   high: { color: "bg-blue-100 text-blue-800", icon: AlertCircle }
 };
 
-export function AgencyLiquidityView({ agencies }: AgencyLiquidityViewProps) {
+export function AgencyLiquidityView({ agencies, cashOperations, onCashOperation }: AgencyLiquidityViewProps) {
   const [selectedAgency, setSelectedAgency] = useState<AgencyLiquidity | null>(null);
   const [showOperationForm, setShowOperationForm] = useState(false);
-  const { processCashOperation, cashOperations } = useLiquidityManager();
 
   const handleCashOperation = (
     agencyId: string,
@@ -37,7 +58,7 @@ export function AgencyLiquidityView({ agencies }: AgencyLiquidityViewProps) {
       reference: string;
     }
   ) => {
-    processCashOperation(agencyId, operation);
+    onCashOperation(agencyId, operation);
     setShowOperationForm(false);
     setSelectedAgency(null);
   };
@@ -69,16 +90,18 @@ export function AgencyLiquidityView({ agencies }: AgencyLiquidityViewProps) {
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl">
-                      <CashOperationForm
-                        agencyId={agency.agencyId}
-                        agencyName={agency.agencyName}
-                        availableCurrencies={agency.balances.map(b => b.currency)}
-                        onSubmit={(operation) => handleCashOperation(agency.agencyId, operation)}
-                        onCancel={() => {
-                          setShowOperationForm(false);
-                          setSelectedAgency(null);
-                        }}
-                      />
+                      {selectedAgency && (
+                        <CashOperationForm
+                          agencyId={selectedAgency.agencyId}
+                          agencyName={selectedAgency.agencyName}
+                          availableCurrencies={selectedAgency.balances.map(b => b.currency)}
+                          onSubmit={(operation) => handleCashOperation(selectedAgency.agencyId, operation)}
+                          onCancel={() => {
+                            setShowOperationForm(false);
+                            setSelectedAgency(null);
+                          }}
+                        />
+                      )}
                     </DialogContent>
                   </Dialog>
                 </div>

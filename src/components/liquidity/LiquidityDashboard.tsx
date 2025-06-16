@@ -10,7 +10,13 @@ import { CashOperationsList } from "./CashOperationsList";
 import { Droplets, Building, Shuffle, AlertTriangle, CreditCard } from "lucide-react";
 
 export function LiquidityDashboard() {
-  const { agencyLiquidity, poolLiquidity, transfers, cashOperations } = useLiquidityManager();
+  const { 
+    agencyLiquidity, 
+    poolLiquidity, 
+    transfers, 
+    cashOperations, 
+    processCashOperation 
+  } = useLiquidityManager();
 
   const totalAlerts = agencyLiquidity.reduce((sum, agency) => sum + agency.alerts.length, 0);
 
@@ -87,7 +93,11 @@ export function LiquidityDashboard() {
         </TabsList>
 
         <TabsContent value="agencies">
-          <AgencyLiquidityView agencies={agencyLiquidity} />
+          <AgencyLiquidityView 
+            agencies={agencyLiquidity} 
+            cashOperations={cashOperations}
+            onCashOperation={processCashOperation}
+          />
         </TabsContent>
 
         <TabsContent value="pool">
