@@ -11,6 +11,7 @@ export interface TransactionCalculationResult {
   fees: FeeCalculation;
   totalCost: number;
   netAmount: number;
+  finalAmount: number; // Added missing property
 }
 
 export interface TransactionCalculationOverrides {
@@ -58,7 +59,8 @@ export class TransactionCalculationService {
 
     // 5. Calculs finaux
     const totalCost = commission.totalCommission + feeCalculation.totalFees;
-    const netAmount = convertedAmount - totalCost;
+    const netAmount = amount - totalCost;
+    const finalAmount = netAmount * exchangeRate; // Calculate final amount after costs
 
     return {
       exchangeRate,
@@ -66,7 +68,8 @@ export class TransactionCalculationService {
       commission,
       fees: feeCalculation,
       totalCost,
-      netAmount
+      netAmount,
+      finalAmount
     };
   }
 

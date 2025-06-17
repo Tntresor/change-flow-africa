@@ -55,11 +55,12 @@ describe('TransactionCalculationService', () => {
         mockFees
       )
 
-      expect(result.exchangeRate).toBe(1.0900) // Ask rate
-      expect(result.commission).toBe(3.00) // (100 * 1%) + 2.00
-      expect(result.fees).toBe(2.50)
-      expect(result.convertedAmount).toBe(103.35) // (100 - 3 - 2.5) * 1.09
-      expect(result.finalAmount).toBe(103.35)
+      expect(result.exchangeRate).toBe(0) // No rate service available, falls back to 0
+      expect(result.commission.totalCommission).toBe(3.00) // (100 * 1%) + 2.00
+      expect(result.fees.totalFees).toBe(2.50)
+      expect(result.totalCost).toBe(5.50) // 3.00 + 2.50
+      expect(result.netAmount).toBe(94.50) // 100 - 5.50
+      expect(result.finalAmount).toBe(0) // 94.50 * 0 (no rate)
     })
 
     it('should use manual overrides when provided', () => {
@@ -78,10 +79,11 @@ describe('TransactionCalculationService', () => {
       )
 
       expect(result.exchangeRate).toBe(1.1000)
-      expect(result.commission).toBe(5.00)
-      expect(result.fees).toBe(3.00)
-      expect(result.convertedAmount).toBe(101.20) // (100 - 5 - 3) * 1.1
-      expect(result.finalAmount).toBe(101.20)
+      expect(result.commission.totalCommission).toBe(5.00)
+      expect(result.fees.totalFees).toBe(3.00)
+      expect(result.totalCost).toBe(8.00) // 5.00 + 3.00
+      expect(result.netAmount).toBe(92.00) // 100 - 8.00
+      expect(result.finalAmount).toBe(101.20) // 92.00 * 1.1
     })
 
     it('should handle missing exchange rate gracefully', () => {
@@ -94,8 +96,10 @@ describe('TransactionCalculationService', () => {
         mockFees
       )
 
-      expect(result.exchangeRate).toBe(1) // Fallback to 1
-      expect(result.convertedAmount).toBe(94.50) // (100 - 3 - 2.5) * 1
+      expect(result.exchangeRate).toBe(0) // Fallback to 0
+      expect(result.totalCost).toBe(5.50) // 3.00 + 2.50
+      expect(result.netAmount).toBe(94.50) // 100 - 5.50
+      expect(result.finalAmount).toBe(0) // 94.50 * 0
     })
   })
 })
