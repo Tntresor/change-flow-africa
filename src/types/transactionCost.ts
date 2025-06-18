@@ -1,4 +1,3 @@
-
 export interface ThirdPartyFeeSettings {
   id: string;
   name: string;
@@ -8,6 +7,7 @@ export interface ThirdPartyFeeSettings {
   currency: string;
   isActive: boolean;
   transactionType?: string;
+  description?: string;
 }
 
 export interface TransactionCostBreakdown {
