@@ -1,4 +1,6 @@
 
+import React from 'react';
+
 // Utilitaire global pour gérer les devises par défaut et le formatage des nombres
 
 export const getCurrencySettings = () => {
