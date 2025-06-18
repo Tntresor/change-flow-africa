@@ -34,6 +34,22 @@ export const mockReconciliationTransactions: ReconciliationTransaction[] = [
     currency: "EUR",
     timestamp: new Date("2024-01-15T14:30:00"),
     impact: "debit"
+  },
+  {
+    transactionId: "txn_rec_003",
+    type: "transaction",
+    amount: 320.75,
+    currency: "USD",
+    timestamp: new Date("2024-01-15T15:45:00"),
+    impact: "debit"
+  },
+  {
+    transactionId: "cash_in_002",
+    type: "cash_in",
+    amount: 1500.00,
+    currency: "CHF",
+    timestamp: new Date("2024-01-15T16:20:00"),
+    impact: "credit"
   }
 ];
 
@@ -82,6 +98,20 @@ export const mockReconciliationEntries: ReconciliationEntry[] = [
     transactions: [mockReconciliationTransactions[0]],
     status: "variance_unresolved",
     notes: "Excédent de 20€ - en cours d'investigation"
+  },
+  {
+    id: "rec_entry_004",
+    agentId: "emp_3",
+    agentName: "Sophie Laurent",
+    agencyId: "2", 
+    date: new Date("2024-01-15"),
+    tillId: "till_004",
+    currency: "CHF",
+    theoreticalBalance: 2200.25,
+    actualCash: 2200.25,
+    variance: 0.00,
+    transactions: [mockReconciliationTransactions[5]],
+    status: "balanced"
   }
 ];
 
@@ -108,7 +138,24 @@ export const mockAuditTrailEntries: AuditTrailEntry[] = [
     timestamp: new Date("2024-01-15T18:30:00"),
     action: "Reconciliation completed",
     performedBy: "Jean Martin",
-    details: "Réconciliation terminée - statut équilibré pour till_002"
+    details: "Réconciliation terminée - statut équilibré pour till_002",
+    relatedTransactionId: "rec_entry_002"
+  },
+  {
+    id: "audit_004",
+    timestamp: new Date("2024-01-15T19:00:00"),
+    action: "Variance investigation started",
+    performedBy: "Sophie Laurent",
+    details: "Investigation démarrée pour l'excédent de 20.00 EUR",
+    relatedTransactionId: "rec_entry_003"
+  },
+  {
+    id: "audit_005",
+    timestamp: new Date("2024-01-15T19:15:00"),
+    action: "Reconciliation completed",
+    performedBy: "Sophie Laurent",
+    details: "Réconciliation CHF terminée - statut équilibré pour till_004",
+    relatedTransactionId: "rec_entry_004"
   }
 ];
 
@@ -125,7 +172,7 @@ export const mockReconciliationReports: ReconciliationReport[] = [
       "USD": 0.00
     },
     status: "pending_review",
-    auditTrail: mockAuditTrailEntries
+    auditTrail: mockAuditTrailEntries.slice(0, 3)
   },
   {
     id: "report_002",
@@ -137,7 +184,7 @@ export const mockReconciliationReports: ReconciliationReport[] = [
       "EUR": 20.00,
       "CHF": 0.00
     },
-    status: "completed",
-    auditTrail: [mockAuditTrailEntries[2]]
+    status: "pending_review", // Changé de completed à pending_review à cause de l'écart EUR
+    auditTrail: mockAuditTrailEntries.slice(3, 5)
   }
 ];
