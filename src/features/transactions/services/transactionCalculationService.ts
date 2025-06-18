@@ -1,6 +1,5 @@
-
 import { ExchangeRateSettings, CommissionTierSettings, FeeSettings } from "@/types/rates";
-import { ExchangeRateService } from "@/features/exchange-rates/services/exchangeRateService";
+import { ExchangeRateService, TransferRateRequest } from "@/features/exchange-rates/services/exchangeRateService";
 import { CommissionService, CommissionCalculation } from "./commissionService";
 import { FeeService, FeeCalculation } from "./feeService";
 
@@ -11,13 +10,16 @@ export interface TransactionCalculationResult {
   fees: FeeCalculation;
   totalCost: number;
   netAmount: number;
-  finalAmount: number; // Added missing property
+  finalAmount: number;
+  transferDirection?: 'SEND' | 'RECEIVE';
+  marginApplied?: number;
 }
 
 export interface TransactionCalculationOverrides {
   rate?: number;
   commission?: number;
   fees?: number;
+  transferDirection?: 'SEND' | 'RECEIVE';
 }
 
 export class TransactionCalculationService {
@@ -31,18 +33,22 @@ export class TransactionCalculationService {
     overrides: TransactionCalculationOverrides = {},
     transactionType: string = "currency_exchange"
   ): TransactionCalculationResult {
-    // 1. Calcul du taux de change
-    const exchangeRate = this.calculateExchangeRate(
+    // Determine transfer direction (default to SEND for backward compatibility)
+    const transferDirection = overrides.transferDirection || 'SEND';
+
+    // 1. Calculate exchange rate with correct bid/ask logic
+    const exchangeRateResult = this.calculateExchangeRate(
       fromCurrency,
       toCurrency,
       exchangeRates,
-      overrides.rate
+      overrides.rate,
+      transferDirection
     );
 
-    // 2. Conversion du montant
-    const convertedAmount = amount * exchangeRate;
+    // 2. Calculate converted amount
+    const convertedAmount = amount * exchangeRateResult.rate;
 
-    // 3. Calcul des commissions
+    // 3. Calculate commissions
     const commission = this.calculateCommission(
       amount,
       commissions,
@@ -50,26 +56,28 @@ export class TransactionCalculationService {
       overrides.commission
     );
 
-    // 4. Calcul des frais
+    // 4. Calculate fees
     const feeCalculation = this.calculateFees(
       fees,
       transactionType,
       overrides.fees
     );
 
-    // 5. Calculs finaux
+    // 5. Final calculations
     const totalCost = commission.totalCommission + feeCalculation.totalFees;
     const netAmount = amount - totalCost;
-    const finalAmount = netAmount * exchangeRate; // Calculate final amount after costs
+    const finalAmount = netAmount * exchangeRateResult.rate;
 
     return {
-      exchangeRate,
+      exchangeRate: exchangeRateResult.rate,
       convertedAmount,
       commission,
       fees: feeCalculation,
       totalCost,
       netAmount,
-      finalAmount
+      finalAmount,
+      transferDirection,
+      marginApplied: exchangeRateResult.marginApplied
     };
   }
 
@@ -77,19 +85,29 @@ export class TransactionCalculationService {
     fromCurrency: string,
     toCurrency: string,
     exchangeRates: ExchangeRateSettings[],
-    manualRate?: number
-  ): number {
+    manualRate?: number,
+    transferDirection: 'SEND' | 'RECEIVE' = 'SEND'
+  ): { rate: number; marginApplied?: number } {
     if (manualRate !== undefined) {
-      return manualRate;
+      return { rate: manualRate };
     }
 
-    const rateCalculation = ExchangeRateService.calculateExchangeRate(
+    // Use the corrected transfer rate calculation
+    const transferRequest: TransferRateRequest = {
+      direction: transferDirection
+    };
+
+    const rateCalculation = ExchangeRateService.calculateTransferRate(
       fromCurrency,
       toCurrency,
-      exchangeRates
+      exchangeRates,
+      transferRequest
     );
 
-    return rateCalculation?.applicableRate || 0;
+    return {
+      rate: rateCalculation?.applicableRate || 0,
+      marginApplied: rateCalculation?.marginApplied
+    };
   }
 
   private static calculateCommission(
