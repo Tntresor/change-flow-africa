@@ -113,11 +113,11 @@ export function ReconciliationManager() {
     }, 5000);
   };
 
-  const handleUpdateEntry = (entryId: string, updates: Partial<ReconciliationEntry>) => {
+  const handleUpdateEntry = (entryId: string, status: ReconciliationEntry['status'], notes?: string) => {
     setReconciliationReport(prev => ({
       ...prev,
       entries: prev.entries.map(entry => 
-        entry.id === entryId ? { ...entry, ...updates } : entry
+        entry.id === entryId ? { ...entry, status, notes: notes || entry.notes } : entry
       )
     }));
     

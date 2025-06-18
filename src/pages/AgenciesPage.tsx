@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AgencyVolumeDisplay } from "@/components/agencies/AgencyVolumeDisplay";
 import { EmployeeManager } from "@/components/employees/EmployeeManager";
-import { CashManagementView } from "@/features/cash-management/components/AgencyCashView";
+import { CashManagementView } from "@/features/cash-management/components/CashManagementView";
 import { mockAgencies, mockTransactions, mockLiquidityOperations, formatAmount } from "@/data/mockData";
 import { mockAgencyLiquidity } from "@/data/mockLiquidityData";
 import { useEmployeeManager } from "@/hooks/useEmployeeManager";
