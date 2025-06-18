@@ -15,7 +15,7 @@ describe('ReconciliationService', () => {
       convertedAmount: 108.5,
       exchangeRate: 1.085,
       fees: 2.50,
-      commission: 1.50,
+      commission: { percentage: 1.5, amount: 1.50 },
       timestamp: new Date('2024-01-15T10:00:00'),
       agencyId: '1',
       agent: { id: 'emp_1', name: 'Marie Dubois', role: 'agent' },
