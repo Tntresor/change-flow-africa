@@ -16,7 +16,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 const menuItems = [
-  { title: "Tableau de bord", url: "/", icon: Home },
+  { title: "Tableau de bord", url: "/dashboard", icon: Home },
   { title: "Transactions", url: "/transactions", icon: ArrowRightLeft },
   { title: "Clients", url: "/customers", icon: Users },
   { title: "Agences", url: "/agencies", icon: Building },
