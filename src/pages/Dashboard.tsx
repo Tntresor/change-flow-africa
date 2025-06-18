@@ -1,43 +1,69 @@
 
-import { StatsCards } from "@/components/dashboard/StatsCards";
 import { RecentTransactions } from "@/components/transactions/RecentTransactions";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, DollarSign, Users, Building } from "lucide-react";
-import { mockTransactions, mockAgencies, formatAmount } from "@/data/mockData";
+import { mockTransactions, mockAgencies } from "@/data/mockData";
+
+// Safe formatting function with fallback
+const formatAmount = (amount: number, currency: string): string => {
+  try {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch (error) {
+    console.error('Error formatting amount:', error);
+    return `${amount.toLocaleString()} ${currency}`;
+  }
+};
 
 export default function Dashboard() {
   const [primaryCurrency, setPrimaryCurrency] = useState("XOF");
   const [secondaryCurrency, setSecondaryCurrency] = useState("MAD");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadCurrencySettings = () => {
-      const primary = localStorage.getItem("exchangehub-primary-currency") || "XOF";
-      const secondary = localStorage.getItem("exchangehub-secondary-currency") || "MAD";
-      setPrimaryCurrency(primary);
-      setSecondaryCurrency(secondary);
-    };
+    try {
+      const loadCurrencySettings = () => {
+        const primary = localStorage.getItem("exchangehub-primary-currency") || "XOF";
+        const secondary = localStorage.getItem("exchangehub-secondary-currency") || "MAD";
+        setPrimaryCurrency(primary);
+        setSecondaryCurrency(secondary);
+      };
 
-    loadCurrencySettings();
-
-    const handleSettingsUpdate = () => {
       loadCurrencySettings();
-    };
-    
-    window.addEventListener('settingsUpdated', handleSettingsUpdate);
-    window.addEventListener('storage', handleSettingsUpdate);
 
-    return () => {
-      window.removeEventListener('settingsUpdated', handleSettingsUpdate);
-      window.removeEventListener('storage', handleSettingsUpdate);
-    };
+      const handleSettingsUpdate = () => {
+        loadCurrencySettings();
+      };
+      
+      window.addEventListener('settingsUpdated', handleSettingsUpdate);
+      window.addEventListener('storage', handleSettingsUpdate);
+
+      setIsLoading(false);
+
+      return () => {
+        window.removeEventListener('settingsUpdated', handleSettingsUpdate);
+        window.removeEventListener('storage', handleSettingsUpdate);
+      };
+    } catch (err) {
+      console.error('Dashboard initialization error:', err);
+      setError('Erreur lors du chargement du tableau de bord');
+      setIsLoading(false);
+    }
   }, []);
 
-  // Calculer les statistiques globales
-  const totalTransactions = mockTransactions.length;
-  const completedTransactions = mockTransactions.filter(t => t.status === 'completed').length;
-  const totalVolume = mockTransactions.reduce((sum, t) => sum + t.amount, 0);
-  const activeAgencies = mockAgencies.filter(a => a.isActive).length;
+  // Calculer les statistiques globales avec gestion d'erreur
+  const stats = {
+    totalTransactions: mockTransactions?.length || 0,
+    completedTransactions: mockTransactions?.filter(t => t.status === 'completed')?.length || 0,
+    totalVolume: mockTransactions?.reduce((sum, t) => sum + (t.amount || 0), 0) || 0,
+    activeAgencies: mockAgencies?.filter(a => a.isActive)?.length || 0
+  };
 
   // Realistic exchange rates for our currencies
   const exchangeRates = {
@@ -59,16 +85,32 @@ export default function Dashboard() {
     const rates = [];
     
     // Always show EUR rates as they're common
-    rates.push({ from: "EUR", to: primaryCurrency, rate: exchangeRates[`EUR_${primaryCurrency}`] || "N/A" });
+    rates.push({ from: "EUR", to: primaryCurrency, rate: exchangeRates[`EUR_${primaryCurrency}` as keyof typeof exchangeRates] || "N/A" });
     if (secondaryCurrency !== primaryCurrency) {
-      rates.push({ from: "EUR", to: secondaryCurrency, rate: exchangeRates[`EUR_${secondaryCurrency}`] || "N/A" });
+      rates.push({ from: "EUR", to: secondaryCurrency, rate: exchangeRates[`EUR_${secondaryCurrency}` as keyof typeof exchangeRates] || "N/A" });
     }
     
     // Show USD rates
-    rates.push({ from: "USD", to: primaryCurrency, rate: exchangeRates[`USD_${primaryCurrency}`] || "N/A" });
+    rates.push({ from: "USD", to: primaryCurrency, rate: exchangeRates[`USD_${primaryCurrency}` as keyof typeof exchangeRates] || "N/A" });
     
     return rates.slice(0, 3); // Limit to 3 rates for clean display
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-gray-600">Chargement du tableau de bord...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -85,9 +127,9 @@ export default function Dashboard() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalTransactions}</div>
+            <div className="text-2xl font-bold">{stats.totalTransactions}</div>
             <p className="text-xs text-muted-foreground">
-              {completedTransactions} complétées
+              {stats.completedTransactions} complétées
             </p>
           </CardContent>
         </Card>
@@ -98,7 +140,7 @@ export default function Dashboard() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatAmount(totalVolume, primaryCurrency)}</div>
+            <div className="text-2xl font-bold">{formatAmount(stats.totalVolume, primaryCurrency)}</div>
             <p className="text-xs text-muted-foreground">
               En {primaryCurrency}
             </p>
@@ -111,9 +153,9 @@ export default function Dashboard() {
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeAgencies}</div>
+            <div className="text-2xl font-bold">{stats.activeAgencies}</div>
             <p className="text-xs text-muted-foreground">
-              Sur {mockAgencies.length} total
+              Sur {mockAgencies?.length || 0} total
             </p>
           </CardContent>
         </Card>
@@ -125,7 +167,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {totalTransactions > 0 ? Math.round((completedTransactions / totalTransactions) * 100) : 0}%
+              {stats.totalTransactions > 0 ? Math.round((stats.completedTransactions / stats.totalTransactions) * 100) : 0}%
             </div>
             <p className="text-xs text-muted-foreground">
               Transactions complétées

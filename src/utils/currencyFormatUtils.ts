@@ -1,58 +1,51 @@
 
-import React from 'react';
-
 // Utilitaire global pour gérer les devises par défaut et le formatage des nombres
 
-export const getCurrencySettings = () => {
-  const primary = localStorage.getItem("exchangehub-primary-currency") || "XOF";
-  const secondary = localStorage.getItem("exchangehub-secondary-currency") || "MAD";
-  return { primary, secondary };
+export const DEFAULT_CURRENCIES = {
+  PRIMARY: 'XOF',
+  SECONDARY: 'MAD'
+} as const;
+
+export type SupportedCurrency = 'XOF' | 'MAD' | 'EUR' | 'USD' | 'AED' | 'RWF';
+
+export const CURRENCY_SYMBOLS: Record<SupportedCurrency, string> = {
+  XOF: 'CFA',
+  MAD: 'MAD',
+  EUR: '€',
+  USD: '$',
+  AED: 'AED',
+  RWF: 'RWF'
 };
 
-export const setCurrencySettings = (primary: string, secondary: string) => {
-  localStorage.setItem("exchangehub-primary-currency", primary);
-  localStorage.setItem("exchangehub-secondary-currency", secondary);
-  
-  // Déclencher un événement global pour notifier les composants
-  window.dispatchEvent(new CustomEvent('currencySettingsChanged', {
-    detail: { primary, secondary }
-  }));
-};
+export const formatAmount = (amount: number, currency: SupportedCurrency): string => {
+  try {
+    // Pour les devises qui ont des symboles spéciaux
+    if (currency === 'XOF') {
+      return `${amount.toLocaleString('fr-FR')} CFA`;
+    }
+    
+    if (currency === 'MAD') {
+      return `${amount.toLocaleString('fr-FR')} MAD`;
+    }
 
-export const formatCurrency = (amount: number, currency: string): string => {
-  // Utiliser le formatAmount existant mais avec une logique améliorée
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'decimal',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount) + ' ' + currency;
+    // Pour EUR et USD, utiliser le formatage standard
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch (error) {
+    console.error('Erreur lors du formatage du montant:', error);
+    return `${amount.toLocaleString()} ${currency}`;
+  }
 };
 
 export const formatNumber = (value: number): string => {
-  return new Intl.NumberFormat('fr-FR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
+  return value.toLocaleString('fr-FR');
 };
 
-// Hook personnalisé pour écouter les changements de devise
-export const useCurrencySettings = (callback?: (settings: { primary: string, secondary: string }) => void) => {
-  const [settings, setSettings] = React.useState(getCurrencySettings);
-  
-  React.useEffect(() => {
-    const handleCurrencyChange = (event: CustomEvent) => {
-      const newSettings = event.detail;
-      setSettings(newSettings);
-      if (callback) {
-        callback(newSettings);
-      }
-    };
-    
-    window.addEventListener('currencySettingsChanged' as any, handleCurrencyChange);
-    return () => {
-      window.removeEventListener('currencySettingsChanged' as any, handleCurrencyChange);
-    };
-  }, [callback]);
-  
-  return settings;
+export const parseCurrencyAmount = (formattedAmount: string): number => {
+  const cleanAmount = formattedAmount.replace(/[^\d,.-]/g, '').replace(',', '.');
+  return parseFloat(cleanAmount) || 0;
 };

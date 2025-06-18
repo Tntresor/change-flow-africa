@@ -8,10 +8,17 @@ import { useNavigate } from "react-router-dom";
 
 export function RecentTransactions() {
   const navigate = useNavigate();
-  const recentTransactions = mockTransactions.slice(0, 5);
+  
+  // Add safety check for mockTransactions
+  const transactions = mockTransactions || [];
+  const recentTransactions = transactions.slice(0, 5);
 
   const handleViewAll = () => {
-    navigate('/transactions');
+    try {
+      navigate('/transactions');
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
   };
 
   return (
@@ -28,9 +35,15 @@ export function RecentTransactions() {
       </div>
       
       <div className="space-y-4">
-        {recentTransactions.map((transaction) => (
-          <TransactionCard key={transaction.id} transaction={transaction} />
-        ))}
+        {recentTransactions.length > 0 ? (
+          recentTransactions.map((transaction) => (
+            <TransactionCard key={transaction.id} transaction={transaction} />
+          ))
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            Aucune transaction récente
+          </div>
+        )}
       </div>
     </Card>
   );
