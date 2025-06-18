@@ -1,83 +1,32 @@
 
-import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "react-router-dom";
+
+interface NavigationTab {
+  label: string;
+  path: string;
+  icon?: string;
+}
 
 export function useNavigationTabs() {
-  const { hasPermission, authState } = useAuth();
+  const location = useLocation();
 
-  const getVisibleTabs = () => {
-    const tabs = [];
+  const allTabs: NavigationTab[] = [
+    { label: "Tableau de bord", path: "/dashboard" },
+    { label: "Transactions", path: "/transactions" },
+    { label: "Liquidité", path: "/liquidity" },
+    { label: "Agences", path: "/agencies" },
+    { label: "Clients", path: "/customers" },
+    { label: "Taux et Tarifs", path: "/rates" },
+    { label: "Statistiques", path: "/stats" },
+    { label: "Import", path: "/import" },
+    { label: "Paramètres", path: "/settings" },
+    { label: "Test Fonctionnalités", path: "/test-features" }, // Nouvelle page de test
+  ];
 
-    // Dashboard - toujours visible
-    tabs.push({
-      path: "/",
-      label: "Tableau de bord",
-      permission: null
-    });
-
-    // Transactions - visible pour tous les utilisateurs connectés
-    tabs.push({
-      path: "/transactions",
-      label: "Transactions",
-      permission: null
-    });
-
-    // Clients - visible pour tous les utilisateurs connectés
-    tabs.push({
-      path: "/customers",
-      label: "Clients",
-      permission: null
-    });
-
-    // Agences - seulement pour ceux qui peuvent voir toutes les agences
-    if (hasPermission('view_all_agencies')) {
-      tabs.push({
-        path: "/agencies",
-        label: "Agences",
-        permission: "view_all_agencies"
-      });
-    }
-
-    // Liquidité - seulement pour ceux qui peuvent gérer la liquidité
-    if (hasPermission('manage_liquidity')) {
-      tabs.push({
-        path: "/liquidity",
-        label: "Liquidité",
-        permission: "manage_liquidity"
-      });
-    }
-
-    // Statistiques - seulement pour ceux qui peuvent voir les rapports
-    if (hasPermission('view_reports')) {
-      tabs.push({
-        path: "/stats",
-        label: "Statistiques",
-        permission: "view_reports"
-      });
-    }
-
-    // Import - seulement pour les administrateurs système
-    if (hasPermission('manage_system')) {
-      tabs.push({
-        path: "/import",
-        label: "Import",
-        permission: "manage_system"
-      });
-    }
-
-    // Taux - seulement pour les administrateurs système
-    if (hasPermission('manage_system')) {
-      tabs.push({
-        path: "/rates",
-        label: "Taux",
-        permission: "manage_system"
-      });
-    }
-
-    return tabs;
-  };
+  const visibleTabs = allTabs;
 
   return {
-    visibleTabs: getVisibleTabs(),
-    hasPermission
+    visibleTabs,
+    currentPath: location.pathname
   };
 }
