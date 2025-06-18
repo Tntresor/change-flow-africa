@@ -1,4 +1,3 @@
-
 import { describe, it, expect } from 'vitest';
 import { ReconciliationService } from '../reconciliationService';
 import { Transaction } from '@/types/transaction';
@@ -12,8 +11,10 @@ describe('ReconciliationService', () => {
       amount: 100,
       fromCurrency: 'EUR',
       toCurrency: 'USD',
-      convertedAmount: 108.5,
       exchangeRate: 1.085,
+      spread: 0.02,
+      finalRate: 1.065,
+      convertedAmount: 108.5,
       fees: 2.50,
       commission: { 
         percentage: 1.5, 
@@ -28,19 +29,36 @@ describe('ReconciliationService', () => {
         },
         totalCommission: 1.50
       },
+      status: 'completed',
       timestamp: new Date('2024-01-15T10:00:00'),
       agencyId: '1',
-      agent: { id: 'emp_1', name: 'Marie Dubois', role: 'agent' },
-      status: 'completed',
-      customer: {
-        id: 'cust_1',
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        phone: '+1234567890',
-        category: 'retail'
+      agencyName: 'Agence Paris Centre',
+      origin: {
+        type: 'agency',
+        id: '1',
+        name: 'Agence Paris Centre',
+        country: 'France'
       },
-      reference: 'REF001'
+      destination: {
+        type: 'agency',
+        id: '1',
+        name: 'Agence Paris Centre',
+        country: 'France'
+      },
+      sender: {
+        id: 'cust_1',
+        name: 'John Doe',
+        email: 'john@example.com',
+        phone: '+1234567890'
+      },
+      receiver: {
+        id: 'cust_2',
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        phone: '+0987654321'
+      },
+      validationType: 'none',
+      agent: { id: 'emp_1', name: 'Marie Dubois', role: 'agent' }
     }
   ];
 
