@@ -3,8 +3,10 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Banknote, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
+import { Banknote, TrendingUp, AlertTriangle, CheckCircle, ArrowRightLeft } from "lucide-react";
 import { useCashManagementTest } from "@/hooks/useCashManagementTest";
+import { useToast } from "@/hooks/use-toast";
+import { formatAmount } from "@/data/mockData";
 
 export function CashManagementTest() {
   const {
@@ -14,6 +16,19 @@ export function CashManagementTest() {
     totalCash,
     alerts
   } = useCashManagementTest();
+  const { toast } = useToast();
+
+  const handleManageTreasury = (agencyId: string, agencyName: string) => {
+    console.log(`Managing treasury for agency: ${agencyId} - ${agencyName}`);
+    
+    toast({
+      title: "Gestion de trésorerie",
+      description: `Interface de gestion ouverte pour ${agencyName}`,
+    });
+    
+    // Appeler la fonction de gestion
+    handleCashTransfer(agencyId);
+  };
 
   return (
     <div className="space-y-6">
@@ -31,7 +46,7 @@ export function CashManagementTest() {
             <div className="flex items-center gap-2">
               <Banknote className="w-8 h-8 text-green-500" />
               <div>
-                <div className="text-2xl font-bold">{totalCash.toLocaleString()} €</div>
+                <div className="text-2xl font-bold">{formatAmount(totalCash, 'EUR')}</div>
                 <div className="text-sm text-gray-600">Trésorerie totale</div>
               </div>
             </div>
@@ -81,7 +96,7 @@ export function CashManagementTest() {
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{currency.code}</span>
                     <span className="text-sm">
-                      {currency.amount.toLocaleString()} {currency.code}
+                      {formatAmount(currency.amount, currency.code)}
                     </span>
                   </div>
                   
@@ -92,8 +107,8 @@ export function CashManagementTest() {
                       <AlertTriangle className="w-4 h-4 text-orange-500" />
                     )}
                     <span className="text-xs text-gray-600">
-                      Min: {currency.minThreshold.toLocaleString()} • 
-                      Max: {currency.maxThreshold.toLocaleString()}
+                      Min: {formatAmount(currency.minThreshold, currency.code)} • 
+                      Max: {formatAmount(currency.maxThreshold, currency.code)}
                     </span>
                   </div>
                 </div>
@@ -105,8 +120,9 @@ export function CashManagementTest() {
                   variant="outline" 
                   className="w-full"
                   disabled={isLoading}
-                  onClick={() => handleCashTransfer(agency.id)}
+                  onClick={() => handleManageTreasury(agency.id, agency.name)}
                 >
+                  <ArrowRightLeft className="w-4 h-4 mr-2" />
                   Gérer la trésorerie
                 </Button>
               </div>

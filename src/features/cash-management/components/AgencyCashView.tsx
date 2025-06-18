@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { AgencyCashSummary, CashierTill, SafeVault, CashTransferRequest } from "@/types/cashManagement";
 import { Vault, Users, ArrowRightLeft, Eye } from "lucide-react";
 import { CashTransferForm } from "./CashTransferForm";
+import { formatAmount } from "@/data/mockData";
 
 interface AgencyCashViewProps {
   cashSummary: AgencyCashSummary;
@@ -16,13 +18,6 @@ interface AgencyCashViewProps {
 export function AgencyCashView({ cashSummary, onCashTransfer }: AgencyCashViewProps) {
   const [showTransferForm, setShowTransferForm] = useState(false);
   const [selectedTill, setSelectedTill] = useState<CashierTill | null>(null);
-
-  const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
-  };
 
   const getTotalForCurrency = (currency: string) => {
     return cashSummary.totalsByCurrency[currency] || 0;
@@ -74,7 +69,7 @@ export function AgencyCashView({ cashSummary, onCashTransfer }: AgencyCashViewPr
             {Object.entries(cashSummary.totalsByCurrency).map(([currency, total]) => (
               <div key={currency} className="text-center p-4 bg-blue-50 rounded-lg">
                 <div className="text-2xl font-bold text-blue-800">
-                  {formatAmount(total as number)}
+                  {formatAmount(total as number, currency)}
                 </div>
                 <div className="text-sm text-blue-600 font-medium">{currency}</div>
               </div>
@@ -97,11 +92,14 @@ export function AgencyCashView({ cashSummary, onCashTransfer }: AgencyCashViewPr
         </TabsList>
 
         <TabsContent value="tills" className="space-y-4">
-          {cashSummary.tills.map((till) => (
+          {cashSummary.tills.map((till, index) => (
             <Card key={till.id}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between text-base">
                   <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                      Caisse #{index + 1}
+                    </Badge>
                     <span>{till.cashierName}</span>
                     <Badge variant={till.isActive ? "default" : "secondary"}>
                       {till.isActive ? "Actif" : "Inactif"}
@@ -121,7 +119,7 @@ export function AgencyCashView({ cashSummary, onCashTransfer }: AgencyCashViewPr
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {till.balances.map((balance) => (
                     <div key={balance.currency} className="text-center p-3 bg-gray-50 rounded">
-                      <div className="font-semibold">{formatAmount(balance.balance)}</div>
+                      <div className="font-semibold">{formatAmount(balance.balance, balance.currency)}</div>
                       <div className="text-sm text-gray-600">{balance.currency}</div>
                       <Badge 
                         className={`text-xs mt-1 ${getStatusColor(balance.status)}`}
@@ -153,7 +151,7 @@ export function AgencyCashView({ cashSummary, onCashTransfer }: AgencyCashViewPr
                 {cashSummary.vault.balances.map((balance) => (
                   <div key={balance.currency} className="text-center p-4 bg-purple-50 rounded-lg">
                     <div className="text-xl font-bold text-purple-800">
-                      {formatAmount(balance.balance)}
+                      {formatAmount(balance.balance, balance.currency)}
                     </div>
                     <div className="text-sm text-purple-600 font-medium">{balance.currency}</div>
                     <Badge 
@@ -163,7 +161,7 @@ export function AgencyCashView({ cashSummary, onCashTransfer }: AgencyCashViewPr
                       {balance.status}
                     </Badge>
                     <div className="text-xs text-gray-500 mt-1">
-                      Disponible: {formatAmount(balance.availableAmount)}
+                      Disponible: {formatAmount(balance.availableAmount, balance.currency)}
                     </div>
                   </div>
                 ))}
@@ -185,7 +183,9 @@ export function AgencyCashView({ cashSummary, onCashTransfer }: AgencyCashViewPr
           <DialogContent>
             <Card>
               <CardHeader>
-                <CardTitle>{selectedTill.cashierName} - Détail de la caisse</CardTitle>
+                <CardTitle>
+                  Caisse #{cashSummary.tills.findIndex(t => t.id === selectedTill.id) + 1} - {selectedTill.cashierName}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {selectedTill.balances.map((balance) => (
@@ -193,17 +193,17 @@ export function AgencyCashView({ cashSummary, onCashTransfer }: AgencyCashViewPr
                     <div>
                       <div className="font-medium">{balance.currency}</div>
                       <div className="text-sm text-gray-500">
-                        Seuils: {formatAmount(balance.minThreshold)} - {formatAmount(balance.maxThreshold)}
+                        Seuils: {formatAmount(balance.minThreshold, balance.currency)} - {formatAmount(balance.maxThreshold, balance.currency)}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold">{formatAmount(balance.balance)}</div>
+                      <div className="font-semibold">{formatAmount(balance.balance, balance.currency)}</div>
                       <div className="text-sm text-gray-500">
-                        Disponible: {formatAmount(balance.availableAmount)}
+                        Disponible: {formatAmount(balance.availableAmount, balance.currency)}
                       </div>
                       {balance.reservedAmount > 0 && (
                         <div className="text-xs text-orange-600">
-                          Réservé: {formatAmount(balance.reservedAmount)}
+                          Réservé: {formatAmount(balance.reservedAmount, balance.currency)}
                         </div>
                       )}
                     </div>

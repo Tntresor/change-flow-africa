@@ -1,4 +1,3 @@
-
 import { Transaction, Agency, Partner, TransactionType, CommissionTier } from "@/types/transaction";
 import { Customer } from "@/types/customer";
 import { v4 as uuidv4 } from 'uuid';
@@ -115,12 +114,28 @@ const currencies = ['EUR', 'USD', 'XOF', 'MAD', 'AED', 'RWF'];
 
 // Fonction d'aide pour formater les montants de manière cohérente
 export const formatAmount = (amount: number, currency: string): string => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: currency,
+  // Gestion spéciale pour certaines devises
+  const currencySymbols: { [key: string]: string } = {
+    'EUR': '€',
+    'USD': '$',
+    'XOF': 'F CFA',
+    'MAD': 'DH',
+    'AED': 'د.إ',
+    'RWF': 'RF',
+    'GBP': '£',
+    'CAD': 'C$'
+  };
+
+  const symbol = currencySymbols[currency] || currency;
+  
+  // Format français pour les nombres
+  const formattedNumber = new Intl.NumberFormat('fr-FR', {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   }).format(amount);
+  
+  // Retourner le montant formaté avec la devise
+  return `${formattedNumber} ${symbol}`;
 };
 
 function generateCoherentTransaction(index: number): Transaction {
