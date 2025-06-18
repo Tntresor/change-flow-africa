@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AgencyVolumeDisplay } from "@/components/agencies/AgencyVolumeDisplay";
 import { EmployeeManager } from "@/components/employees/EmployeeManager";
+import { CashManagementView } from "@/features/cash-management/components/AgencyCashView";
 import { mockAgencies, mockTransactions, mockLiquidityOperations, formatAmount } from "@/data/mockData";
+import { mockAgencyLiquidity } from "@/data/mockLiquidityData";
 import { useEmployeeManager } from "@/hooks/useEmployeeManager";
 import { 
   Building, 
@@ -82,6 +84,15 @@ export default function AgenciesPage() {
     return mockTransactions.filter(t => t.agencyId === agencyId);
   };
 
+  // Obtenir la liquidité disponible pour une agence
+  const getAgencyLiquidity = (agencyId: string) => {
+    const agencyLiq = mockAgencyLiquidity.find(liq => liq.agencyId === agencyId);
+    if (!agencyLiq) return null;
+    
+    const primaryBalance = agencyLiq.balances.find(b => b.currency === primaryCurrency);
+    return primaryBalance ? primaryBalance.availableAmount : 0;
+  };
+
   const mockAgencyVolumes = agencies.map(agency => {
     const stats = getAgencyStats(agency.id);
     return {
@@ -111,13 +122,14 @@ export default function AgenciesPage() {
           <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="volumes">Volumes</TabsTrigger>
           <TabsTrigger value="employees">Employés</TabsTrigger>
-          <TabsTrigger value="management">Gestion</TabsTrigger>
+          <TabsTrigger value="cash-management">Gestion de caisse</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {agencies.map((agency) => {
               const stats = getAgencyStats(agency.id);
+              const availableLiquidity = getAgencyLiquidity(agency.id);
               return (
                 <Card key={agency.id}>
                   <CardHeader>
@@ -145,6 +157,16 @@ export default function AgenciesPage() {
                       <TrendingUp className="w-4 h-4 text-gray-500" />
                       <span className="text-sm">{stats.totalTransactions} transactions</span>
                     </div>
+
+                    {/* Liquidité disponible */}
+                    {availableLiquidity !== null && (
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="w-4 h-4 text-green-500" />
+                        <span className="text-sm">
+                          Liquidité: {formatAmount(availableLiquidity, primaryCurrency)}
+                        </span>
+                      </div>
+                    )}
                     
                     {/* Opérations de liquidité par devise */}
                     <div className="pt-3 border-t space-y-2">
@@ -266,44 +288,8 @@ export default function AgenciesPage() {
           <EmployeeManager />
         </TabsContent>
 
-        <TabsContent value="management" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Liste des Agences</CardTitle>
-              <CardDescription>Gérez les informations de vos agences</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {agencies.map((agency) => {
-                  const stats = getAgencyStats(agency.id);
-                  return (
-                    <div key={agency.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold">{agency.name}</h4>
-                          <Badge variant="outline">{agency.code}</Badge>
-                        </div>
-                        <p className="text-sm text-gray-600">{agency.country}</p>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>{stats.employeeCount} employés</span>
-                          <span>{stats.totalTransactions} transactions</span>
-                          <span>{formatAmount(stats.totalVolume, 'EUR')}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button size="sm" variant="outline">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="cash-management" className="space-y-6">
+          <CashManagementView />
         </TabsContent>
       </Tabs>
     </div>

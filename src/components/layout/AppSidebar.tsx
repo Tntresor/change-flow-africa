@@ -11,7 +11,7 @@ import {
   SidebarHeader,
   SidebarFooter
 } from "@/components/ui/sidebar";
-import { Home, ArrowRightLeft, Settings, BarChart3, Users, Upload, TrendingUp, Droplets, Building } from "lucide-react";
+import { Home, ArrowRightLeft, Settings, BarChart3, Users, Upload, TrendingUp, Droplets, Building, Beaker } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 
@@ -24,6 +24,7 @@ const menuItems = [
   { title: "Taux et commissions", url: "/rates", icon: TrendingUp },
   { title: "Statistiques", url: "/stats", icon: BarChart3 },
   { title: "Import", url: "/import", icon: Upload },
+  { title: "Fonctionnalités avancées", url: "/test-features", icon: Beaker },
   { title: "Paramètres", url: "/settings", icon: Settings },
 ];
 
