@@ -7,4 +7,4 @@ export type {
   ReconciliationReport,
   ReconciliationTransaction,
   AuditTrailEntry
-} from '../types/reconciliation';
+} from '../../types/reconciliation';

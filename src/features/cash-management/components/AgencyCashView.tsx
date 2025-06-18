@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +25,7 @@ export function AgencyCashView({ cashSummary, onCashTransfer }: AgencyCashViewPr
   };
 
   const getTotalForCurrency = (currency: string) => {
-    return cashSummary.totalsByurrency[currency] || 0;
+    return cashSummary.totalsByCurrency[currency] || 0;
   };
 
   const getStatusColor = (status: string) => {
@@ -72,10 +71,10 @@ export function AgencyCashView({ cashSummary, onCashTransfer }: AgencyCashViewPr
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {Object.entries(cashSummary.totalsByurrency).map(([currency, total]) => (
+            {Object.entries(cashSummary.totalsByCurrency).map(([currency, total]) => (
               <div key={currency} className="text-center p-4 bg-blue-50 rounded-lg">
                 <div className="text-2xl font-bold text-blue-800">
-                  {formatAmount(total)}
+                  {formatAmount(total as number)}
                 </div>
                 <div className="text-sm text-blue-600 font-medium">{currency}</div>
               </div>

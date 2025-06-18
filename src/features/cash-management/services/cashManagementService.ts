@@ -11,30 +11,30 @@ export class CashManagementService {
     tills: CashierTill[],
     vault: SafeVault
   ): AgencyCashSummary {
-    const totalsByurrency: { [currency: string]: number } = {};
+    const totalsByCurrency: { [currency: string]: number } = {};
 
     // Consolider les caisses
     tills.forEach(till => {
       till.balances.forEach(balance => {
-        if (!totalsByurrency[balance.currency]) {
-          totalsByurrency[balance.currency] = 0;
+        if (!totalsByCurrency[balance.currency]) {
+          totalsByCurrency[balance.currency] = 0;
         }
-        totalsByurrency[balance.currency] += balance.balance;
+        totalsByCurrency[balance.currency] += balance.balance;
       });
     });
 
     // Ajouter le coffre
     vault.balances.forEach(balance => {
-      if (!totalsByurrency[balance.currency]) {
-        totalsByurrency[balance.currency] = 0;
+      if (!totalsByCurrency[balance.currency]) {
+        totalsByCurrency[balance.currency] = 0;
       }
-      totalsByurrency[balance.currency] += balance.balance;
+      totalsByCurrency[balance.currency] += balance.balance;
     });
 
     return {
       agencyId: vault.agencyId,
       agencyName: vault.agencyName,
-      totalsByurrency,
+      totalsByCurrency,
       tills,
       vault,
       lastConsolidation: new Date()

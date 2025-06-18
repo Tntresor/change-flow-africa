@@ -7,4 +7,4 @@ export type {
   SafeVault,
   CashTransferRequest,
   AgencyCashSummary
-} from '../types/cashManagement';
+} from '../../types/cashManagement';

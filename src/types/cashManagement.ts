@@ -1,4 +1,6 @@
 
+import { CurrencyBalance } from './liquidity';
+
 export interface CashierTill {
   id: string;
   cashierId: string;

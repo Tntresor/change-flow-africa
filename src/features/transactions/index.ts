@@ -14,6 +14,6 @@ export type {
   ThirdPartyFeeSettings,
   TransactionCostBreakdown,
   TransactionCostCalculation
-} from '../types/transactionCost';
+} from '../../types/transactionCost';
 export type { CommissionCalculation } from './services/commissionService';
 export type { FeeCalculation } from './services/feeService';
