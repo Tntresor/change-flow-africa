@@ -18,7 +18,14 @@ describe('ReconciliationService', () => {
       commission: { 
         percentage: 1.5, 
         amount: 1.50,
-        tier: 'standard',
+        tier: {
+          id: 'standard',
+          name: 'Standard',
+          minAmount: 0,
+          maxAmount: 1000,
+          fixedAmount: 1.50,
+          percentage: 1.5
+        },
         totalCommission: 1.50
       },
       timestamp: new Date('2024-01-15T10:00:00'),
