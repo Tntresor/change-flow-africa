@@ -7,7 +7,48 @@ import { useToast } from "@/hooks/use-toast";
 
 export function useCashManagementTest() {
   const [cashSummaries, setCashSummaries] = useState<AgencyCashSummary[]>(mockAgencyCashSummaries);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // Calculate total cash across all agencies
+  const totalCash = cashSummaries.reduce((total, summary) => {
+    return total + Object.values(summary.totalsByCurrency).reduce((sum, amount) => sum + amount, 0);
+  }, 0);
+
+  // Calculate alerts (agencies with critical or low status)
+  const alerts = cashSummaries.reduce((count, summary) => {
+    const hasAlerts = summary.tills.some(till => 
+      till.balances.some(balance => balance.status === 'critical' || balance.status === 'low')
+    ) || summary.vault.balances.some(balance => balance.status === 'critical' || balance.status === 'low');
+    return hasAlerts ? count + 1 : count;
+  }, 0);
+
+  // Convert summaries to agency cash data format expected by the component
+  const agencyCashData = cashSummaries.map(summary => ({
+    id: summary.agencyId,
+    name: summary.agencyName,
+    status: summary.vault.balances.some(b => b.status === 'critical' || b.status === 'low') ? 'attention' : 'optimal',
+    currencies: summary.vault.balances.map(balance => ({
+      code: balance.currency,
+      amount: balance.balance,
+      status: balance.status === 'critical' || balance.status === 'low' ? 'attention' : 'optimal',
+      minThreshold: balance.minThreshold,
+      maxThreshold: balance.maxThreshold
+    }))
+  }));
+
+  const handleCashTransfer = async (agencyId: string) => {
+    setIsLoading(true);
+    
+    // Simulate processing
+    setTimeout(() => {
+      setIsLoading(false);
+      toast({
+        title: "Gestion de trésorerie",
+        description: `Traitement initié pour l'agence ${agencyId}`,
+      });
+    }, 1000);
+  };
 
   const processCashTransfer = (agencyIndex: number, request: CashTransferRequest) => {
     const currentSummary = cashSummaries[agencyIndex];
@@ -82,6 +123,11 @@ export function useCashManagementTest() {
 
   return {
     cashSummaries,
+    agencyCashData,
+    handleCashTransfer,
+    isLoading,
+    totalCash,
+    alerts,
     processCashTransfer,
     createNewCashierTill
   };

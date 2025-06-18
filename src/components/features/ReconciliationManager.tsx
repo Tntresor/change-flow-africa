@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Download, Play, Calendar, TrendingUp, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ReconciliationView } from "@/features/reconciliation/components/ReconciliationView";
+import { ReconciliationReport, ReconciliationEntry } from "@/types/reconciliation";
 
 interface ReportFile {
   id: string;
@@ -69,9 +69,22 @@ const fileTypeColors = {
   cash_report: 'bg-orange-100 text-orange-800'
 };
 
+// Mock reconciliation report
+const mockReconciliationReport: ReconciliationReport = {
+  id: 'report-1',
+  agencyId: '1',
+  agencyName: 'Agence Paris Centre',
+  date: new Date(),
+  entries: [],
+  totalVariance: { EUR: 0, XOF: 0 },
+  status: 'pending_review',
+  auditTrail: []
+};
+
 export function ReconciliationManager() {
   const [reportFiles] = useState<ReportFile[]>(mockReportFiles);
   const [isRunningReconciliation, setIsRunningReconciliation] = useState(false);
+  const [reconciliationReport, setReconciliationReport] = useState<ReconciliationReport>(mockReconciliationReport);
   const { toast } = useToast();
 
   const handleDownloadFile = (file: ReportFile) => {
@@ -98,6 +111,27 @@ export function ReconciliationManager() {
         description: "Le processus de réconciliation s'est terminé avec succès",
       });
     }, 5000);
+  };
+
+  const handleUpdateEntry = (entryId: string, updates: Partial<ReconciliationEntry>) => {
+    setReconciliationReport(prev => ({
+      ...prev,
+      entries: prev.entries.map(entry => 
+        entry.id === entryId ? { ...entry, ...updates } : entry
+      )
+    }));
+    
+    toast({
+      title: "Entrée mise à jour",
+      description: "L'entrée de réconciliation a été modifiée",
+    });
+  };
+
+  const handleGenerateReport = () => {
+    toast({
+      title: "Rapport généré",
+      description: "Le rapport de réconciliation a été généré avec succès",
+    });
   };
 
   const getFilesByAgency = () => {
@@ -225,7 +259,11 @@ export function ReconciliationManager() {
         </TabsContent>
 
         <TabsContent value="reconciliation" className="space-y-6">
-          <ReconciliationView />
+          <ReconciliationView 
+            report={reconciliationReport}
+            onUpdateEntry={handleUpdateEntry}
+            onGenerateReport={handleGenerateReport}
+          />
         </TabsContent>
       </Tabs>
     </div>
