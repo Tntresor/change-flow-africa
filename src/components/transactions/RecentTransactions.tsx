@@ -5,9 +5,35 @@ import { TransactionCard } from "./TransactionCard";
 import { mockTransactions } from "@/data/mockData";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export function RecentTransactions() {
   const navigate = useNavigate();
+  const [primaryCurrency, setPrimaryCurrency] = useState("XOF");
+  const [secondaryCurrency, setSecondaryCurrency] = useState("MAD");
+  
+  useEffect(() => {
+    const loadCurrencySettings = () => {
+      const primary = localStorage.getItem("exchangehub-primary-currency") || "XOF";
+      const secondary = localStorage.getItem("exchangehub-secondary-currency") || "MAD";
+      setPrimaryCurrency(primary);
+      setSecondaryCurrency(secondary);
+    };
+
+    loadCurrencySettings();
+
+    const handleSettingsUpdate = () => {
+      loadCurrencySettings();
+    };
+    
+    window.addEventListener('settingsUpdated', handleSettingsUpdate);
+    window.addEventListener('storage', handleSettingsUpdate);
+
+    return () => {
+      window.removeEventListener('settingsUpdated', handleSettingsUpdate);
+      window.removeEventListener('storage', handleSettingsUpdate);
+    };
+  }, []);
   
   // Add safety check for mockTransactions
   const transactions = mockTransactions || [];
@@ -37,7 +63,12 @@ export function RecentTransactions() {
       <div className="space-y-4">
         {recentTransactions.length > 0 ? (
           recentTransactions.map((transaction) => (
-            <TransactionCard key={transaction.id} transaction={transaction} />
+            <TransactionCard 
+              key={transaction.id} 
+              transaction={transaction}
+              primaryCurrency={primaryCurrency}
+              secondaryCurrency={secondaryCurrency}
+            />
           ))
         ) : (
           <div className="text-center py-8 text-gray-500">

@@ -8,6 +8,8 @@ import { fr } from "date-fns/locale";
 
 interface TransactionCardProps {
   transaction: Transaction;
+  primaryCurrency?: string;
+  secondaryCurrency?: string;
 }
 
 const statusConfig = {
@@ -24,7 +26,22 @@ const typeConfig = {
   payment: { label: "Paiement", color: "bg-orange-500", icon: Users }
 };
 
-export function TransactionCard({ transaction }: TransactionCardProps) {
+// Safe formatting function with fallback
+const formatAmount = (amount: number, currency: string): string => {
+  try {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch (error) {
+    console.error('Error formatting amount:', error);
+    return `${amount.toLocaleString()} ${currency}`;
+  }
+};
+
+export function TransactionCard({ transaction, primaryCurrency = "XOF", secondaryCurrency = "MAD" }: TransactionCardProps) {
   const status = statusConfig[transaction.status];
   const type = typeConfig[transaction.type];
   const StatusIcon = status.icon;
@@ -54,13 +71,13 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
         <div>
           <p className="text-sm text-gray-500">Montant envoyé</p>
           <p className="font-semibold text-gray-900">
-            {transaction.amount.toLocaleString()} {transaction.fromCurrency}
+            {formatAmount(transaction.amount, transaction.fromCurrency)}
           </p>
         </div>
         <div>
           <p className="text-sm text-gray-500">Montant reçu</p>
           <p className="font-semibold text-gray-900">
-            {transaction.convertedAmount.toLocaleString()} {transaction.toCurrency}
+            {formatAmount(transaction.convertedAmount, transaction.toCurrency)}
           </p>
         </div>
       </div>
@@ -121,19 +138,19 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
           <div>
             <p className="text-gray-500">Commission</p>
             <p className="font-semibold">
-              {(transaction.commission?.totalCommission || 0).toLocaleString()} {transaction.fromCurrency}
+              {formatAmount(transaction.commission?.totalCommission || 0, transaction.fromCurrency)}
             </p>
           </div>
           <div>
             <p className="text-gray-500">Frais</p>
             <p className="font-semibold">
-              {(transaction.fees || 0).toLocaleString()} {transaction.fromCurrency}
+              {formatAmount(transaction.fees || 0, transaction.fromCurrency)}
             </p>
           </div>
           <div>
             <p className="text-gray-500">Total prélevé</p>
             <p className="font-semibold">
-              {totalCosts.toLocaleString()} {transaction.fromCurrency}
+              {formatAmount(totalCosts, transaction.fromCurrency)}
             </p>
           </div>
         </div>
