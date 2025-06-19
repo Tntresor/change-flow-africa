@@ -1,4 +1,6 @@
 
+import { Transaction } from "./transaction";
+
 export interface TransactionCancellation {
   id: string;
   originalTransactionId: string;
