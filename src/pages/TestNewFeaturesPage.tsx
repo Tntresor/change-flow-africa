@@ -3,8 +3,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MakerCheckerTest } from "@/components/test/MakerCheckerTest";
 import { TransactionCancellationTest } from "@/components/test/TransactionCancellationTest";
 import { LedgerTest } from "@/components/test/LedgerTest";
+import { TestingGuide } from "@/components/test/TestingGuide";
 
-export default function TestNewFeaturesPage() {
+export default function TestNew() {
   return (
     <div className="container mx-auto py-6">
       <div className="mb-6">
@@ -13,6 +14,8 @@ export default function TestNewFeaturesPage() {
           Testez les fonctionnalités Maker-Checker, Annulation de transactions et Micro-Ledger
         </p>
       </div>
+
+      <TestingGuide />
 
       <Tabs defaultValue="maker-checker" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
