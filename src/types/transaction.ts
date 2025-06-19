@@ -35,7 +35,8 @@ export type TransactionType =
   | 'internal_transfer'    // Transfert interne entre agences
   | 'international_transfer' // Transfert international
   | 'currency_exchange'    // Opération de change
-  | 'payment';             // Paiement pour le compte d'un client
+  | 'payment'             // Paiement pour le compte d'un client
+  | 'reversal';             // Réversal d'une transaction
 
 export interface TransactionLocation {
   type: 'agency' | 'partner' | 'network';

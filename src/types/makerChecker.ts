@@ -13,6 +13,16 @@ export interface MakerCheckerRule {
   updatedAt: Date;
 }
 
+export interface ApprovalRule {
+  id: string;
+  transactionType: 'internal_transfer' | 'international_transfer' | 'currency_exchange' | 'payment';
+  maxAmount: number;
+  currency: string;
+  isActive: boolean;
+  requiredApprovalLevel: 'supervisor' | 'manager' | 'administrator';
+  description: string;
+}
+
 export interface TransactionApproval {
   id: string;
   transactionId: string;
@@ -25,11 +35,12 @@ export interface TransactionApproval {
   approvedAt?: Date;
   rejectionReason?: string;
   comments?: string;
+  requiredApprovalLevel: 'supervisor' | 'manager' | 'administrator';
 }
 
 export interface PendingTransaction {
   id: string;
   originalTransaction: any; // Transaction data before approval
   approvalRequest: TransactionApproval;
-  ruleTriggered: MakerCheckerRule;
+  ruleTriggered: ApprovalRule;
 }
