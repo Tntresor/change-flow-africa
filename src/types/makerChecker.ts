@@ -36,11 +36,12 @@ export interface TransactionApproval {
   rejectionReason?: string;
   comments?: string;
   requiredApprovalLevel: 'supervisor' | 'manager' | 'administrator';
+  ruleId?: string;
 }
 
 export interface PendingTransaction {
   id: string;
-  originalTransaction: any; // Transaction data before approval
+  originalTransaction: any;
   approvalRequest: TransactionApproval;
   ruleTriggered: ApprovalRule;
 }

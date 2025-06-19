@@ -15,9 +15,10 @@ export interface TransactionCancellation {
   approvedAt?: Date;
 }
 
-export interface ReversalTransaction extends Omit<Transaction, 'id' | 'timestamp'> {
+export interface ReversalTransaction extends Omit<Transaction, 'id' | 'timestamp' | 'type'> {
   id: string;
   timestamp: Date;
+  type: 'reversal';
   isReversal: boolean;
   originalTransactionId: string;
   reversalReason: string;

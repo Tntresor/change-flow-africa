@@ -32,11 +32,11 @@ export interface Transaction {
 }
 
 export type TransactionType = 
-  | 'internal_transfer'    // Transfert interne entre agences
-  | 'international_transfer' // Transfert international
-  | 'currency_exchange'    // Opération de change
-  | 'payment'             // Paiement pour le compte d'un client
-  | 'reversal';             // Réversal d'une transaction
+  | 'internal_transfer'
+  | 'international_transfer'
+  | 'currency_exchange'
+  | 'payment'
+  | 'reversal';
 
 export interface TransactionLocation {
   type: 'agency' | 'partner' | 'network';

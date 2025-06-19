@@ -22,7 +22,6 @@ import ImportPage from "@/pages/ImportPage";
 import LoginPage from "@/pages/LoginPage";
 import NotFound from "@/pages/NotFound";
 import TestFeaturesPage from "@/pages/TestFeaturesPage";
-import TestNewFeaturesPage from "@/pages/TestNewFeaturesPage";
 
 const queryClient = new QueryClient();
 
@@ -52,7 +51,6 @@ function App() {
                       <Route path="/settings" element={<SettingsPage />} />
                       <Route path="/import" element={<ImportPage />} />
                       <Route path="/test-features" element={<TestFeaturesPage />} />
-                      <Route path="/test-new-features" element={<TestNewFeaturesPage />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </AppLayout>

@@ -47,7 +47,6 @@ export function AppSidebar() {
 
     loadCompanyName();
 
-    // Listen for storage changes to update the company name in real-time
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "koba-general-settings") {
         loadCompanyName();
@@ -56,7 +55,6 @@ export function AppSidebar() {
 
     window.addEventListener('storage', handleStorageChange);
     
-    // Also listen for custom events when settings are saved in the same tab
     const handleSettingsUpdate = () => {
       loadCompanyName();
     };
