@@ -6,10 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useMakerChecker } from "@/hooks/useMakerChecker";
 import { useState } from "react";
 import { Transaction } from "@/types/transaction";
-import { CheckCircle, XCircle, Clock } from "lucide-react";
+import { CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react";
+
+const REJECTION_REASONS = [
+  "Montant trop élevé pour ce type de transaction",
+  "Documents justificatifs insuffisants",
+  "Informations client incomplètes",
+  "Transaction suspecte - AML",
+  "Dépassement des limites journalières",
+  "Autre (préciser)"
+];
 
 export function MakerCheckerTest() {
   const { 
@@ -21,6 +31,7 @@ export function MakerCheckerTest() {
   } = useMakerChecker();
 
   const [testTransaction, setTestTransaction] = useState<Partial<Transaction>>({
+    id: `test_${Date.now()}`,
     agencyId: "1",
     type: "currency_exchange",
     amount: 6000,
@@ -30,11 +41,17 @@ export function MakerCheckerTest() {
 
   const [approvalData, setApprovalData] = useState({
     comments: "",
-    rejectionReason: ""
+    rejectionReason: "",
+    customReason: ""
   });
+
+  const [approvalResult, setApprovalResult] = useState<any>(null);
+  const [selectedPendingId, setSelectedPendingId] = useState<string | null>(null);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
 
   const handleCheckApproval = () => {
     const result = checkTransactionApproval(testTransaction);
+    setApprovalResult(result);
     console.log("Vérification d'approbation:", result);
   };
 
@@ -54,15 +71,28 @@ export function MakerCheckerTest() {
       "Marie Supervisor",
       approvalData.comments
     );
+    setShowApprovalDialog(false);
+    setSelectedPendingId(null);
   };
 
   const handleReject = (approvalId: string) => {
+    const finalReason = approvalData.rejectionReason === "Autre (préciser)" 
+      ? approvalData.customReason 
+      : approvalData.rejectionReason;
+    
     rejectTransaction(
       approvalId,
       "emp_2",
       "Marie Supervisor", 
-      approvalData.rejectionReason
+      finalReason
     );
+    setShowApprovalDialog(false);
+    setSelectedPendingId(null);
+  };
+
+  const openApprovalDialog = (pendingId: string) => {
+    setSelectedPendingId(pendingId);
+    setShowApprovalDialog(true);
   };
 
   const statusIcons = {
@@ -137,7 +167,7 @@ export function MakerCheckerTest() {
           </div>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 mb-4">
           <Button onClick={handleCheckApproval} variant="outline">
             Vérifier si approbation requise
           </Button>
@@ -145,6 +175,29 @@ export function MakerCheckerTest() {
             Soumettre pour approbation
           </Button>
         </div>
+
+        {approvalResult && (
+          <Card className="p-4 mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              {approvalResult.requiresApproval ? (
+                <AlertCircle className="w-5 h-5 text-orange-500" />
+              ) : (
+                <CheckCircle className="w-5 h-5 text-green-500" />
+              )}
+              <span className="font-medium">
+                {approvalResult.requiresApproval ? "Approbation requise" : "Aucune approbation requise"}
+              </span>
+            </div>
+            {approvalResult.rule && (
+              <p className="text-sm text-gray-600">
+                Règle déclenchée : {approvalResult.rule.transactionType} - Limite : {approvalResult.rule.maxAmount} {approvalResult.rule.currency}
+              </p>
+            )}
+            {approvalResult.error && (
+              <p className="text-sm text-red-600">{approvalResult.error}</p>
+            )}
+          </Card>
+        )}
       </Card>
 
       {pendingTransactions.length > 0 && (
@@ -153,7 +206,7 @@ export function MakerCheckerTest() {
           
           <div className="space-y-4">
             {pendingTransactions.map((pending) => (
-              <div key={pending.id} className="border rounded-lg p-4">
+              <div key={`pending-${pending.id}-${pending.approvalRequest.id}`} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     {statusIcons[pending.approvalRequest.status]}
@@ -174,40 +227,13 @@ export function MakerCheckerTest() {
                 </p>
                 
                 {pending.approvalRequest.status === 'pending' && (
-                  <div className="space-y-3">
-                    <div>
-                      <Label>Commentaires (optionnel)</Label>
-                      <Textarea 
-                        value={approvalData.comments}
-                        onChange={(e) => setApprovalData({...approvalData, comments: e.target.value})}
-                        placeholder="Commentaires pour l'approbation..."
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label>Raison de rejet (si applicable)</Label>
-                      <Input 
-                        value={approvalData.rejectionReason}
-                        onChange={(e) => setApprovalData({...approvalData, rejectionReason: e.target.value})}
-                        placeholder="Raison du rejet..."
-                      />
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button 
-                        onClick={() => handleApprove(pending.approvalRequest.id)}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        Approuver
-                      </Button>
-                      <Button 
-                        onClick={() => handleReject(pending.approvalRequest.id)}
-                        variant="destructive"
-                        disabled={!approvalData.rejectionReason}
-                      >
-                        Rejeter
-                      </Button>
-                    </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => openApprovalDialog(pending.approvalRequest.id)}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      Traiter la demande
+                    </Button>
                   </div>
                 )}
                 
@@ -233,6 +259,71 @@ export function MakerCheckerTest() {
           </div>
         </Card>
       )}
+
+      <Dialog open={showApprovalDialog} onOpenChange={setShowApprovalDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Traiter la demande d'approbation</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label>Commentaires (optionnel)</Label>
+              <Textarea 
+                value={approvalData.comments}
+                onChange={(e) => setApprovalData({...approvalData, comments: e.target.value})}
+                placeholder="Commentaires pour l'approbation..."
+              />
+            </div>
+            
+            <div>
+              <Label>Raison de rejet (si applicable)</Label>
+              <Select 
+                value={approvalData.rejectionReason}
+                onValueChange={(value) => setApprovalData({...approvalData, rejectionReason: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une raison" />
+                </SelectTrigger>
+                <SelectContent>
+                  {REJECTION_REASONS.map((reason) => (
+                    <SelectItem key={reason} value={reason}>
+                      {reason}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {approvalData.rejectionReason === "Autre (préciser)" && (
+              <div>
+                <Label>Préciser la raison</Label>
+                <Input 
+                  value={approvalData.customReason}
+                  onChange={(e) => setApprovalData({...approvalData, customReason: e.target.value})}
+                  placeholder="Préciser la raison du rejet..."
+                />
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button 
+              onClick={() => selectedPendingId && handleApprove(selectedPendingId)}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Approuver
+            </Button>
+            <Button 
+              onClick={() => selectedPendingId && handleReject(selectedPendingId)}
+              variant="destructive"
+              disabled={!approvalData.rejectionReason || (approvalData.rejectionReason === "Autre (préciser)" && !approvalData.customReason)}
+            >
+              Rejeter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

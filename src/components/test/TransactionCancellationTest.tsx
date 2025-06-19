@@ -22,6 +22,7 @@ export function TransactionCancellationTest() {
   const [cancellationReason, setCancellationReason] = useState("");
   const [cancellations, setCancellations] = useState<TransactionCancellation[]>([]);
   const [reversalTransactions, setReversalTransactions] = useState<ReversalTransaction[]>([]);
+  const [permissionResult, setPermissionResult] = useState<any>(null);
 
   const completedTransactions = mockTransactions.filter(t => t.status === 'completed').slice(0, 10);
   const selectedTransaction = completedTransactions.find(t => t.id === selectedTransactionId);
@@ -42,6 +43,7 @@ export function TransactionCancellationTest() {
       userAgency
     );
 
+    setPermissionResult(result);
     console.log("Vérification des permissions d'annulation:", result);
     
     toast({
@@ -52,10 +54,19 @@ export function TransactionCancellationTest() {
   };
 
   const handleCancelTransaction = () => {
-    if (!selectedTransaction || !cancellationReason) {
+    if (!selectedTransaction || !cancellationReason.trim()) {
       toast({
         title: "Erreur",
         description: "Veuillez sélectionner une transaction et saisir une raison",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (cancellationReason.trim().length < 10) {
+      toast({
+        title: "Erreur",
+        description: "La raison doit contenir au moins 10 caractères",
         variant: "destructive"
       });
       return;
@@ -81,8 +92,17 @@ export function TransactionCancellationTest() {
       selectedTransaction,
       "emp_current",
       "Utilisateur Test",
-      cancellationReason
+      cancellationReason.trim()
     );
+
+    if (!reversalTransaction) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer la transaction d'annulation",
+        variant: "destructive"
+      });
+      return;
+    }
 
     // Créer l'enregistrement d'annulation
     const cancellationRecord = TransactionCancellationService.createCancellationRecord(
@@ -90,8 +110,17 @@ export function TransactionCancellationTest() {
       reversalTransaction.id,
       "emp_current",
       "Utilisateur Test",
-      cancellationReason
+      cancellationReason.trim()
     );
+
+    if (!cancellationRecord) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer l'enregistrement d'annulation",
+        variant: "destructive"
+      });
+      return;
+    }
 
     // Ajouter aux listes
     setReversalTransactions(prev => [...prev, reversalTransaction]);
@@ -104,6 +133,7 @@ export function TransactionCancellationTest() {
 
     // Réinitialiser le formulaire
     setCancellationReason("");
+    setPermissionResult(null);
   };
 
   return (
@@ -173,23 +203,48 @@ export function TransactionCancellationTest() {
           </Card>
         )}
 
+        {permissionResult && (
+          <Card className="p-4 mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              {permissionResult.canCancel ? (
+                <CheckCircle className="w-5 h-5 text-green-500" />
+              ) : (
+                <XCircle className="w-5 h-5 text-red-500" />
+              )}
+              <span className="font-medium">
+                {permissionResult.canCancel ? "Annulation autorisée" : "Annulation refusée"}
+              </span>
+            </div>
+            {permissionResult.reason && (
+              <p className="text-sm text-gray-600">{permissionResult.reason}</p>
+            )}
+          </Card>
+        )}
+
         <div className="mb-4">
           <Label>Raison de l'annulation</Label>
           <Textarea 
             value={cancellationReason}
             onChange={(e) => setCancellationReason(e.target.value)}
-            placeholder="Saisir la raison de l'annulation..."
+            placeholder="Saisir la raison de l'annulation (minimum 10 caractères)..."
           />
+          <p className="text-xs text-gray-500 mt-1">
+            {cancellationReason.length}/10 caractères minimum
+          </p>
         </div>
         
         <div className="flex gap-2">
-          <Button onClick={handleCheckCancellationPermission} variant="outline">
+          <Button 
+            onClick={handleCheckCancellationPermission} 
+            variant="outline"
+            disabled={!selectedTransaction}
+          >
             Vérifier les permissions
           </Button>
           <Button 
             onClick={handleCancelTransaction}
             variant="destructive"
-            disabled={!selectedTransaction || !cancellationReason}
+            disabled={!selectedTransaction || !cancellationReason.trim() || cancellationReason.trim().length < 10}
           >
             Annuler la transaction
           </Button>
@@ -198,7 +253,7 @@ export function TransactionCancellationTest() {
 
       {cancellations.length > 0 && (
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Historique des annulations</h3>
+          <h3 className="text-lg font-semibold mb-4">Historique des annulations ({cancellations.length})</h3>
           
           <div className="space-y-4">
             {cancellations.map((cancellation) => (
@@ -238,7 +293,7 @@ export function TransactionCancellationTest() {
 
       {reversalTransactions.length > 0 && (
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Transactions d'annulation créées</h3>
+          <h3 className="text-lg font-semibold mb-4">Transactions d'annulation créées ({reversalTransactions.length})</h3>
           
           <div className="space-y-4">
             {reversalTransactions.map((reversal) => (

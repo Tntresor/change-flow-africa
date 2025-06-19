@@ -20,7 +20,8 @@ export function useNavigationTabs() {
     { label: "Statistiques", path: "/stats" },
     { label: "Import", path: "/import" },
     { label: "Paramètres", path: "/settings" },
-    { label: "Test Fonctionnalités", path: "/test-features" }, // Nouvelle page de test
+    { label: "Test Fonctionnalités", path: "/test-features" },
+    { label: "Nouvelles fonctionnalités", path: "/test-new-features" },
   ];
 
   const visibleTabs = allTabs;

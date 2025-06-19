@@ -19,7 +19,10 @@ export function LedgerTest() {
   const selectedTransaction = completedTransactions.find(t => t.id === selectedTransactionId);
 
   const handleCreateLedgerEntries = () => {
-    if (!selectedTransaction) return;
+    if (!selectedTransaction) {
+      console.log("Aucune transaction sélectionnée");
+      return;
+    }
 
     const entries = LedgerService.createLedgerEntriesFromTransaction(selectedTransaction);
     setLedgerEntries(prev => [...prev, ...entries]);
@@ -28,7 +31,10 @@ export function LedgerTest() {
   };
 
   const handleCreateReversalEntries = () => {
-    if (!selectedTransaction) return;
+    if (!selectedTransaction) {
+      console.log("Aucune transaction sélectionnée");
+      return;
+    }
 
     const originalEntries = ledgerEntries.filter(
       entry => entry.transactionId === selectedTransaction.id && !entry.isReversalEntry
@@ -41,7 +47,7 @@ export function LedgerTest() {
 
     const reversalEntries = LedgerService.createReversalEntries(
       originalEntries, 
-      `reversal_${selectedTransaction.id}`
+      `reversal_${selectedTransaction.id}_${Date.now()}`
     );
     
     setLedgerEntries(prev => [...prev, ...reversalEntries]);
@@ -49,8 +55,16 @@ export function LedgerTest() {
   };
 
   const handleCalculateAgencyBalance = () => {
+    if (ledgerEntries.length === 0) {
+      console.log("Aucune écriture comptable disponible pour calculer les balances");
+      return;
+    }
+
     const currencies = ['EUR', 'XOF', 'USD', 'MAD'];
-    const agencies = ['1', '2', '3'];
+    const agencies = Array.from(new Set(ledgerEntries.map(entry => entry.agencyId)));
+
+    console.log("Agences trouvées:", agencies);
+    console.log("Devises à traiter:", currencies);
 
     const newAgencyLedgers: AgencyLedger[] = agencies.map(agencyId => {
       const agencyEntries = ledgerEntries.filter(entry => entry.agencyId === agencyId);
@@ -66,6 +80,8 @@ export function LedgerTest() {
         }
       });
 
+      console.log(`Balances pour ${agencyName}:`, balancesByCurrency);
+
       return {
         agencyId,
         agencyName,
@@ -75,7 +91,7 @@ export function LedgerTest() {
       };
     }).filter(ledger => Object.keys(ledger.balancesByCurrency).length > 0);
 
-    setAgencyLedgers(newAgencyLedgers);
+    setAgencyLedgers(newAgencyLe dgers);
     console.log("Balances par agence calculées:", newAgencyLedgers);
   };
 
@@ -160,15 +176,22 @@ export function LedgerTest() {
           <Button 
             onClick={handleCalculateAgencyBalance}
             variant="outline"
+            disabled={ledgerEntries.length === 0}
           >
             Calculer balances agences
           </Button>
           <Button 
             onClick={handleConsolidateLedgers}
             variant="outline"
+            disabled={agencyLedgers.length === 0}
           >
             Consolider
           </Button>
+        </div>
+
+        <div className="text-sm text-gray-600 space-y-1">
+          <p>Écritures comptables : {ledgerEntries.length}</p>
+          <p>Balances calculées : {agencyLedgers.length} agences</p>
         </div>
       </Card>
 
@@ -177,8 +200,8 @@ export function LedgerTest() {
           <h3 className="text-lg font-semibold mb-4">Écritures comptables ({ledgerEntries.length})</h3>
           
           <div className="space-y-3">
-            {ledgerEntries.map((entry) => (
-              <div key={entry.id} className="border rounded-lg p-3">
+            {ledgerEntries.map((entry, index) => (
+              <div key={`${entry.id}-${index}`} className="border rounded-lg p-3">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4" />
@@ -228,16 +251,16 @@ export function LedgerTest() {
 
       {agencyLedgers.length > 0 && (
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Balances par agence</h3>
+          <h3 className="text-lg font-semibold mb-4">Balances par agence ({agencyLedgers.length})</h3>
           
           <div className="space-y-4">
-            {agencyLedgers.map((ledger) => (
-              <div key={ledger.agencyId} className="border rounded-lg p-4">
+            {agencyLedgers.map((ledger, index) => (
+              <div key={`${ledger.agencyId}-${index}`} className="border rounded-lg p-4">
                 <h4 className="font-medium mb-3">{ledger.agencyName}</h4>
                 
                 <div className="space-y-3">
                   {Object.entries(ledger.balancesByCurrency).map(([currency, balance]) => (
-                    <div key={currency} className="bg-gray-50 p-3 rounded">
+                    <div key={`${ledger.agencyId}-${currency}`} className="bg-gray-50 p-3 rounded">
                       <h5 className="font-medium mb-2">{currency}</h5>
                       <div className="grid grid-cols-5 gap-2 text-sm">
                         <div>
