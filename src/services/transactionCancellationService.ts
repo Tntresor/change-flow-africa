@@ -139,12 +139,23 @@ export class TransactionCancellationService {
       exchangeRate: originalTransaction.exchangeRate ? 1 / originalTransaction.exchangeRate : 0,
       convertedAmount: originalTransaction.amount, // Montant original à restituer
       fees: 0, // Pas de frais sur les annulations
-      commission: null,
+      commission: {
+        amount: 0,
+        percentage: 0,
+        tier: originalTransaction.commission.tier,
+        totalCommission: 0
+      },
       status: 'pending',
       timestamp: new Date(),
       reversalReason: reason.trim(),
-      cancelledBy: cancelledBy.trim(),
-      cancelledByName: cancelledByName.trim()
+      isReversal: true,
+      spread: 0,
+      finalRate: originalTransaction.exchangeRate ? 1 / originalTransaction.exchangeRate : 0,
+      origin: originalTransaction.origin,
+      destination: originalTransaction.destination,
+      sender: originalTransaction.receiver, // Inverser sender/receiver
+      receiver: originalTransaction.sender,
+      validationType: 'none'
     };
   }
 

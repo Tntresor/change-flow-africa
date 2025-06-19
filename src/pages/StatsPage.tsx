@@ -6,8 +6,11 @@ import { LedgerTest } from "@/components/test/LedgerTest";
 import { TransactionTypeStats } from "@/components/stats/TransactionTypeStats";
 import { Badge } from "@/components/ui/badge";
 import { BarChart3, BookOpen } from "lucide-react";
+import { useTransactionState } from "@/hooks/useTransactionState";
 
 export default function StatsPage() {
+  const { transactions } = useTransactionState();
+
   return (
     <div className="space-y-6">
       <div>
@@ -40,7 +43,7 @@ export default function StatsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <TransactionTypeStats />
+                <TransactionTypeStats transactions={transactions} />
               </CardContent>
             </Card>
           </div>

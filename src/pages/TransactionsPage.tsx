@@ -7,8 +7,23 @@ import { MakerCheckerTest } from "@/components/test/MakerCheckerTest";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, AlertTriangle } from "lucide-react";
+import { useTransactionState } from "@/hooks/useTransactionState";
+import { useTransactionFilters } from "@/hooks/useTransactionFilters";
 
 export default function TransactionsPage() {
+  const {
+    transactions,
+    selectedTransaction,
+    showAddForm,
+    handleViewTransaction,
+    handleCloseDetailDialog,
+    handleAddTransaction,
+    handleCloseAddForm,
+    handleOpenAddForm,
+  } = useTransactionState();
+
+  const { filters, setFilters, filteredTransactions, hasActiveFilters } = useTransactionFilters(transactions);
+
   return (
     <div className="space-y-6">
       <div>
@@ -34,7 +49,14 @@ export default function TransactionsPage() {
         </TabsList>
 
         <TabsContent value="transactions">
-          <TransactionPageLayout />
+          <TransactionPageLayout 
+            transactions={transactions}
+            filteredTransactions={filteredTransactions}
+            hasActiveFilters={hasActiveFilters}
+            onAddTransaction={handleOpenAddForm}
+            onViewTransaction={handleViewTransaction}
+            onFiltersChange={setFilters}
+          />
         </TabsContent>
 
         <TabsContent value="maker-checker">
@@ -52,7 +74,7 @@ export default function TransactionsPage() {
         <TabsContent value="cancellation">
           <Card className="p-6">
             <div className="mb-4">
-              <h2 className="text-xl font-semibold mb-2">Annulation de transactions</h2>
+              <h2 className="text-xl font-semibent mb-2">Annulation de transactions</h2>
               <p className="text-gray-600">
                 Annulation sécurisée des transactions avec validation des permissions
               </p>
