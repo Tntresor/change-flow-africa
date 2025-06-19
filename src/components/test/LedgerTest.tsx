@@ -91,7 +91,7 @@ export function LedgerTest() {
       };
     }).filter(ledger => Object.keys(ledger.balancesByCurrency).length > 0);
 
-    setAgencyLedgers(newAgencyLe dgers);
+    setAgencyLedgers(newAgencyLedgers);
     console.log("Balances par agence calculées:", newAgencyLedgers);
   };
 

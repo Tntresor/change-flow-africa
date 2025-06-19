@@ -1,146 +1,167 @@
 
-import { MakerCheckerRule, TransactionApproval, PendingTransaction } from "@/types/makerChecker";
 import { Transaction } from "@/types/transaction";
+import { ApprovalRule, TransactionApproval } from "@/types/makerChecker";
 
-// Mock data pour les règles maker-checker
-const mockMakerCheckerRules: MakerCheckerRule[] = [
+// Règles d'approbation avec validation stricte
+const APPROVAL_RULES: ApprovalRule[] = [
   {
-    id: "rule_1",
-    agencyId: "1",
-    agencyName: "Agence Paris Centre",
+    id: "rule_change_5000_eur",
     transactionType: "currency_exchange",
-    currency: "EUR",
     maxAmount: 5000,
-    requiresApproval: true,
-    approverRoles: ["supervisor", "manager"],
+    currency: "EUR",
     isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    requiredApprovalLevel: "supervisor",
+    description: "Change dépassant 5000 EUR nécessite une approbation superviseur"
   },
   {
-    id: "rule_2",
-    agencyId: "1",
-    agencyName: "Agence Paris Centre",
+    id: "rule_transfer_10000_eur", 
     transactionType: "international_transfer",
-    currency: "XOF",
-    maxAmount: 1000000,
-    requiresApproval: true,
-    approverRoles: ["manager", "administrator"],
+    maxAmount: 10000,
+    currency: "EUR",
     isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    requiredApprovalLevel: "manager",
+    description: "Transfert international dépassant 10000 EUR nécessite une approbation manager"
   },
   {
-    id: "rule_3",
-    agencyId: "2",
-    agencyName: "Agence Douala",
-    transactionType: "currency_exchange",
+    id: "rule_change_2500000_xof",
+    transactionType: "currency_exchange", 
+    maxAmount: 2500000,
     currency: "XOF",
-    maxAmount: 500000,
-    requiresApproval: true,
-    approverRoles: ["supervisor", "manager"],
     isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    requiredApprovalLevel: "supervisor",
+    description: "Change dépassant 2.5M XOF nécessite une approbation superviseur"
   }
 ];
 
 export class MakerCheckerService {
-  private static validateTransaction(transaction: Partial<Transaction>): boolean {
-    if (!transaction.agencyId || typeof transaction.agencyId !== 'string') return false;
-    if (!transaction.type || typeof transaction.type !== 'string') return false;
-    if (!transaction.amount || typeof transaction.amount !== 'number' || transaction.amount <= 0) return false;
-    if (!transaction.fromCurrency || typeof transaction.fromCurrency !== 'string') return false;
-    return true;
-  }
-
-  private static validateApprovalRequest(
-    requestedBy: string,
-    requestedByName: string
-  ): boolean {
-    if (!requestedBy || typeof requestedBy !== 'string' || requestedBy.trim().length === 0) return false;
-    if (!requestedByName || typeof requestedByName !== 'string' || requestedByName.trim().length === 0) return false;
-    return true;
-  }
-
-  static getRulesByAgency(agencyId: string): MakerCheckerRule[] {
-    if (!agencyId || typeof agencyId !== 'string') {
-      console.warn('MakerCheckerService: Invalid agencyId provided');
-      return [];
+  /**
+   * Vérifie si une transaction nécessite une approbation
+   * Validation stricte des paramètres d'entrée
+   */
+  static checkTransactionRequiresApproval(transaction: Partial<Transaction>): {
+    requiresApproval: boolean;
+    rule?: ApprovalRule;
+    error?: string;
+  } {
+    // Validation des paramètres obligatoires
+    if (!transaction) {
+      return { requiresApproval: false, error: "Transaction manquante" };
     }
 
-    return mockMakerCheckerRules.filter(rule => 
-      rule.agencyId === agencyId && rule.isActive
+    if (!transaction.type?.trim()) {
+      return { requiresApproval: false, error: "Type de transaction manquant" };
+    }
+
+    if (!transaction.amount || transaction.amount <= 0) {
+      return { requiresApproval: false, error: "Montant invalide" };
+    }
+
+    if (!transaction.fromCurrency?.trim()) {
+      return { requiresApproval: false, error: "Devise source manquante" };
+    }
+
+    if (!transaction.agencyId?.trim()) {
+      return { requiresApproval: false, error: "ID agence manquant" };
+    }
+
+    // Recherche des règles applicables avec validation stricte
+    const applicableRules = APPROVAL_RULES.filter(rule => {
+      return rule.isActive &&
+             rule.transactionType === transaction.type &&
+             rule.currency === transaction.fromCurrency &&
+             transaction.amount! > rule.maxAmount;
+    });
+
+    if (applicableRules.length === 0) {
+      return { requiresApproval: false };
+    }
+
+    // Retourner la règle la plus stricte (montant le plus bas)
+    const strictestRule = applicableRules.reduce((prev, current) => 
+      prev.maxAmount < current.maxAmount ? prev : current
     );
+
+    return {
+      requiresApproval: true,
+      rule: strictestRule
+    };
   }
 
-  static checkTransactionRequiresApproval(
-    transaction: Partial<Transaction>
-  ): { requiresApproval: boolean; rule?: MakerCheckerRule; error?: string } {
-    if (!this.validateTransaction(transaction)) {
-      return { 
-        requiresApproval: false, 
-        error: "Transaction invalide - données manquantes ou incorrectes" 
-      };
-    }
-
-    try {
-      const applicableRule = mockMakerCheckerRules.find(rule =>
-        rule.agencyId === transaction.agencyId &&
-        rule.transactionType === transaction.type &&
-        rule.currency === transaction.fromCurrency &&
-        rule.isActive &&
-        transaction.amount! > rule.maxAmount
-      );
-
-      return {
-        requiresApproval: !!applicableRule,
-        rule: applicableRule
-      };
-    } catch (error) {
-      console.error('Error checking transaction approval requirements:', error);
-      return { 
-        requiresApproval: false, 
-        error: "Erreur lors de la vérification des règles d'approbation" 
-      };
-    }
-  }
-
+  /**
+   * Crée une demande d'approbation avec validation stricte
+   */
   static createApprovalRequest(
     transaction: Partial<Transaction>,
-    rule: MakerCheckerRule,
+    rule: ApprovalRule,
     requestedBy: string,
     requestedByName: string
   ): TransactionApproval | null {
-    if (!this.validateApprovalRequest(requestedBy, requestedByName)) {
-      console.error('Invalid approval request data');
+    // Validation stricte des paramètres
+    if (!transaction?.id?.trim()) {
+      console.error("ID transaction manquant pour la demande d'approbation");
       return null;
     }
 
-    if (!transaction.id && !transaction.amount && !transaction.type) {
-      console.error('Invalid transaction data for approval request');
+    if (!rule?.id?.trim()) {
+      console.error("Règle d'approbation invalide");
       return null;
     }
 
-    try {
-      return {
-        id: `approval_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        transactionId: transaction.id || `temp_${Date.now()}`,
-        requestedBy: requestedBy.trim(),
-        requestedByName: requestedByName.trim(),
-        requestedAt: new Date(),
-        status: 'pending'
-      };
-    } catch (error) {
-      console.error('Error creating approval request:', error);
+    if (!requestedBy?.trim() || requestedBy.trim().length < 3) {
+      console.error("ID du demandeur invalide");
       return null;
     }
+
+    if (!requestedByName?.trim() || requestedByName.trim().length < 2) {
+      console.error("Nom du demandeur invalide");
+      return null;
+    }
+
+    // Validation de sécurité: vérifier que la transaction nécessite vraiment une approbation
+    const approvalCheck = this.checkTransactionRequiresApproval(transaction);
+    if (!approvalCheck.requiresApproval) {
+      console.error("Tentative de création d'approbation pour une transaction qui n'en nécessite pas");
+      return null;
+    }
+
+    return {
+      id: `approval_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      transactionId: transaction.id,
+      ruleId: rule.id,
+      status: 'pending',
+      requestedBy: requestedBy.trim(),
+      requestedByName: requestedByName.trim(),
+      requestedAt: new Date(),
+      requiredApprovalLevel: rule.requiredApprovalLevel
+    };
   }
 
-  static canUserApprove(userRole: string, rule: MakerCheckerRule): boolean {
-    if (!userRole || typeof userRole !== 'string') return false;
-    if (!rule || !rule.approverRoles) return false;
+  /**
+   * Obtient toutes les règles actives
+   */
+  static getActiveRules(): ApprovalRule[] {
+    return APPROVAL_RULES.filter(rule => rule.isActive);
+  }
+
+  /**
+   * Obtient une règle par son ID avec validation
+   */
+  static getRuleById(ruleId: string): ApprovalRule | null {
+    if (!ruleId?.trim()) {
+      return null;
+    }
     
-    return rule.approverRoles.includes(userRole as any);
+    return APPROVAL_RULES.find(rule => rule.id === ruleId.trim()) || null;
+  }
+
+  /**
+   * Valide si un utilisateur peut approuver selon son niveau
+   */
+  static canUserApprove(userLevel: string, requiredLevel: string): boolean {
+    const levels = ['agent', 'supervisor', 'manager', 'administrator'];
+    const userLevelIndex = levels.indexOf(userLevel?.toLowerCase()?.trim() || '');
+    const requiredLevelIndex = levels.indexOf(requiredLevel?.toLowerCase()?.trim() || '');
+    
+    return userLevelIndex >= 0 && requiredLevelIndex >= 0 && userLevelIndex >= requiredLevelIndex;
   }
 }

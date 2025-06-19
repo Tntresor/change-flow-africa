@@ -3,118 +3,154 @@ import { Transaction } from "@/types/transaction";
 import { TransactionCancellation, ReversalTransaction } from "@/types/transactionCancellation";
 
 export class TransactionCancellationService {
-  private static validateUser(userRole: string, userAgency?: string): boolean {
-    if (!userRole || typeof userRole !== 'string') return false;
-    if (userAgency && typeof userAgency !== 'string') return false;
-    return true;
-  }
-
-  private static validateTransaction(transaction: Transaction): boolean {
-    if (!transaction || !transaction.id) return false;
-    if (!transaction.agencyId || !transaction.status) return false;
-    return true;
-  }
-
+  
+  /**
+   * Vérifie si un utilisateur peut annuler une transaction
+   * Validation stricte des permissions et contraintes métier
+   */
   static canCancelTransaction(
-    transaction: Transaction,
-    userRole: string,
-    userAgency?: string
+    transaction: Transaction, 
+    userRole: string, 
+    userAgency: string
   ): { canCancel: boolean; reason?: string } {
+    
     // Validation des paramètres d'entrée
-    if (!this.validateUser(userRole, userAgency)) {
-      return { canCancel: false, reason: "Données utilisateur invalides" };
-    }
-
-    if (!this.validateTransaction(transaction)) {
+    if (!transaction) {
       return { canCancel: false, reason: "Transaction invalide" };
     }
 
-    // Seuls les superviseurs et managers peuvent annuler
-    if (!['supervisor', 'manager', 'administrator'].includes(userRole)) {
-      return { canCancel: false, reason: "Permissions insuffisantes" };
+    if (!userRole?.trim()) {
+      return { canCancel: false, reason: "Rôle utilisateur invalide" };
     }
 
-    // Ne peut pas annuler ses propres transactions (sauf admin)
-    if (transaction.agent?.role === userRole && userRole !== 'administrator') {
-      return { canCancel: false, reason: "Impossible d'annuler sa propre transaction" };
+    if (!userAgency?.trim()) {
+      return { canCancel: false, reason: "Agence utilisateur invalide" };
     }
 
-    // Vérifier que la transaction est de la même agence (sauf admin)
-    if (userRole !== 'administrator' && transaction.agencyId !== userAgency) {
-      return { canCancel: false, reason: "Transaction d'une autre agence" };
+    // Validation du statut de la transaction
+    if (transaction.status !== 'completed') {
+      return { canCancel: false, reason: "Seules les transactions complétées peuvent être annulées" };
     }
 
-    // Ne peut pas annuler une transaction déjà annulée
-    if ((transaction as any).isReversal) {
-      return { canCancel: false, reason: "Transaction déjà annulée" };
+    // Contrainte temporelle: pas d'annulation après 24h
+    const transactionDate = new Date(transaction.timestamp);
+    const now = new Date();
+    const hoursDiff = (now.getTime() - transactionDate.getTime()) / (1000 * 60 * 60);
+    
+    if (hoursDiff > 24) {
+      return { canCancel: false, reason: "Impossible d'annuler une transaction de plus de 24h" };
     }
 
-    // Ne peut pas annuler une transaction rejetée
-    if (transaction.status === 'rejected') {
-      return { canCancel: false, reason: "Transaction déjà rejetée" };
+    // Vérification des permissions par rôle
+    const normalizedRole = userRole.toLowerCase().trim();
+    
+    switch (normalizedRole) {
+      case 'agent':
+        // Les agents ne peuvent annuler que leurs propres transactions de leur agence
+        if (transaction.agencyId !== userAgency) {
+          return { canCancel: false, reason: "Vous ne pouvez annuler que les transactions de votre agence" };
+        }
+        if (transaction.amount > 1000) {
+          return { canCancel: false, reason: "Les agents ne peuvent annuler des transactions > 1000 EUR" };
+        }
+        break;
+        
+      case 'supervisor':
+        // Les superviseurs peuvent annuler dans leur agence jusqu'à 10000 EUR
+        if (transaction.agencyId !== userAgency) {
+          return { canCancel: false, reason: "Vous ne pouvez annuler que les transactions de votre agence" };
+        }
+        if (transaction.amount > 10000) {
+          return { canCancel: false, reason: "Montant trop élevé pour votre niveau d'autorisation" };
+        }
+        break;
+        
+      case 'manager':
+        // Les managers peuvent annuler jusqu'à 50000 EUR dans toute agence
+        if (transaction.amount > 50000) {
+          return { canCancel: false, reason: "Montant trop élevé pour votre niveau d'autorisation" };
+        }
+        break;
+        
+      case 'administrator':
+        // Les administrateurs peuvent tout annuler
+        break;
+        
+      default:
+        return { canCancel: false, reason: "Rôle utilisateur non reconnu" };
     }
 
-    // Ne peut pas annuler une transaction en cours
-    if (transaction.status === 'pending') {
-      return { canCancel: false, reason: "Impossible d'annuler une transaction en cours" };
+    // Vérifications de sécurité supplémentaires
+    if (transaction.type === 'international_transfer' && transaction.amount > 25000 && normalizedRole !== 'administrator') {
+      return { canCancel: false, reason: "Seuls les administrateurs peuvent annuler des transferts internationaux > 25000 EUR" };
     }
 
     return { canCancel: true };
   }
 
+  /**
+   * Crée une transaction d'annulation (reversal) avec validation stricte
+   */
   static createReversalTransaction(
     originalTransaction: Transaction,
     cancelledBy: string,
     cancelledByName: string,
     reason: string
   ): ReversalTransaction | null {
-    // Validation des paramètres
-    if (!originalTransaction || !originalTransaction.id) {
-      console.error('Transaction originale invalide');
+    
+    // Validation stricte des paramètres
+    if (!originalTransaction?.id?.trim()) {
+      console.error("Transaction originale invalide");
       return null;
     }
 
-    if (!cancelledBy || !cancelledByName || !reason) {
-      console.error('Paramètres d\'annulation manquants');
+    if (!cancelledBy?.trim() || cancelledBy.trim().length < 3) {
+      console.error("ID utilisateur invalide pour l'annulation");
       return null;
     }
 
-    if (reason.trim().length < 10) {
-      console.error('Raison d\'annulation trop courte');
+    if (!cancelledByName?.trim() || cancelledByName.trim().length < 2) {
+      console.error("Nom utilisateur invalide pour l'annulation");
       return null;
     }
 
-    try {
-      return {
-        ...originalTransaction,
-        id: `rev_${originalTransaction.id}_${Date.now()}`,
-        timestamp: new Date(),
-        isReversal: true,
-        originalTransactionId: originalTransaction.id,
-        reversalReason: reason.trim(),
-        // Inverser les montants pour annuler l'impact comptable
-        amount: -originalTransaction.amount,
-        convertedAmount: -originalTransaction.convertedAmount,
-        // Inverser expéditeur et destinataire pour l'impact liquidité
-        fromCurrency: originalTransaction.toCurrency,
-        toCurrency: originalTransaction.fromCurrency,
-        sender: originalTransaction.receiver,
-        receiver: originalTransaction.sender,
-        origin: originalTransaction.destination,
-        destination: originalTransaction.origin,
-        status: 'completed',
-        agent: {
-          id: cancelledBy,
-          name: cancelledByName.trim(),
-          role: 'supervisor' // Assumons que c'est un superviseur qui annule
-        }
-      } as ReversalTransaction;
-    } catch (error) {
-      console.error('Erreur lors de la création de la transaction d\'annulation:', error);
+    if (!reason?.trim() || reason.trim().length < 10) {
+      console.error("Raison d'annulation insuffisante (minimum 10 caractères)");
       return null;
     }
+
+    // Validation de sécurité: vérifier que la transaction peut être annulée
+    if (originalTransaction.status !== 'completed') {
+      console.error("Tentative d'annulation d'une transaction non complétée");
+      return null;
+    }
+
+    const reversalId = `reversal_${originalTransaction.id}_${Date.now()}`;
+    
+    return {
+      id: reversalId,
+      originalTransactionId: originalTransaction.id,
+      type: 'reversal',
+      agencyId: originalTransaction.agencyId,
+      agencyName: originalTransaction.agencyName,
+      amount: originalTransaction.amount,
+      fromCurrency: originalTransaction.toCurrency, // Inverser les devises
+      toCurrency: originalTransaction.fromCurrency,
+      exchangeRate: originalTransaction.exchangeRate ? 1 / originalTransaction.exchangeRate : 0,
+      convertedAmount: originalTransaction.amount, // Montant original à restituer
+      fees: 0, // Pas de frais sur les annulations
+      commission: null,
+      status: 'pending',
+      timestamp: new Date(),
+      reversalReason: reason.trim(),
+      cancelledBy: cancelledBy.trim(),
+      cancelledByName: cancelledByName.trim()
+    };
   }
 
+  /**
+   * Crée un enregistrement d'annulation avec validation
+   */
   static createCancellationRecord(
     originalTransactionId: string,
     reversalTransactionId: string,
@@ -122,26 +158,73 @@ export class TransactionCancellationService {
     cancelledByName: string,
     reason: string
   ): TransactionCancellation | null {
-    // Validation des paramètres
-    if (!originalTransactionId || !reversalTransactionId || !cancelledBy || !cancelledByName || !reason) {
-      console.error('Paramètres manquants pour la création de l\'enregistrement d\'annulation');
+    
+    // Validation stricte des paramètres
+    if (!originalTransactionId?.trim()) {
+      console.error("ID transaction originale manquant");
       return null;
     }
 
-    try {
-      return {
-        id: `cancel_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        originalTransactionId: originalTransactionId.trim(),
-        reversalTransactionId: reversalTransactionId.trim(),
-        cancelledBy: cancelledBy.trim(),
-        cancelledByName: cancelledByName.trim(),
-        cancelledAt: new Date(),
-        reason: reason.trim(),
-        status: 'completed'
-      };
-    } catch (error) {
-      console.error('Erreur lors de la création de l\'enregistrement d\'annulation:', error);
+    if (!reversalTransactionId?.trim()) {
+      console.error("ID transaction d'annulation manquant");
       return null;
     }
+
+    if (!cancelledBy?.trim() || cancelledBy.trim().length < 3) {
+      console.error("ID utilisateur invalide");
+      return null;
+    }
+
+    if (!cancelledByName?.trim() || cancelledByName.trim().length < 2) {
+      console.error("Nom utilisateur invalide");
+      return null;
+    }
+
+    if (!reason?.trim() || reason.trim().length < 10) {
+      console.error("Raison d'annulation insuffisante");
+      return null;
+    }
+
+    return {
+      id: `cancellation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      originalTransactionId: originalTransactionId.trim(),
+      reversalTransactionId: reversalTransactionId.trim(),
+      status: 'completed',
+      reason: reason.trim(),
+      cancelledBy: cancelledBy.trim(),
+      cancelledByName: cancelledByName.trim(),
+      cancelledAt: new Date()
+    };
+  }
+
+  /**
+   * Valide si une raison d'annulation est acceptable
+   */
+  static validateCancellationReason(reason: string): { isValid: boolean; error?: string } {
+    if (!reason?.trim()) {
+      return { isValid: false, error: "Raison d'annulation obligatoire" };
+    }
+
+    const trimmedReason = reason.trim();
+    
+    if (trimmedReason.length < 10) {
+      return { isValid: false, error: "La raison doit contenir au moins 10 caractères" };
+    }
+
+    if (trimmedReason.length > 500) {
+      return { isValid: false, error: "La raison ne peut dépasser 500 caractères" };
+    }
+
+    // Vérification de mots interdits (sécurité basique)
+    const forbiddenWords = ['test', 'fake', 'bidon'];
+    const hasForbiddenWords = forbiddenWords.some(word => 
+      trimmedReason.toLowerCase().includes(word)
+    );
+
+    if (hasForbiddenWords) {
+      return { isValid: false, error: "Raison d'annulation non professionnelle détectée" };
+    }
+
+    return { isValid: true };
   }
 }
