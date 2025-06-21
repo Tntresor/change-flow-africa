@@ -5,6 +5,7 @@ import { mockTransactions } from "@/data/mockData";
 import { useLiquidityManager } from "./useLiquidityManager";
 import { useTransactionValidation } from "./useTransactionValidation";
 import { useToast } from "@/hooks/use-toast";
+import { LedgerService } from "@/services/ledgerService";
 
 export function useTransactionState() {
   const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
@@ -50,11 +51,24 @@ export function useTransactionState() {
     // Mettre à jour les balances de liquidité
     updateBalanceAfterTransaction(transactionWithAgent);
     
+    // Générer automatiquement les écritures comptables
+    try {
+      LedgerService.autoGenerateLedgerEntries(transactionWithAgent);
+      console.log('Écritures comptables générées automatiquement pour la transaction:', transactionWithAgent.id);
+    } catch (error) {
+      console.error('Erreur lors de la génération des écritures comptables:', error);
+      toast({
+        title: "Avertissement",
+        description: "Transaction créée mais erreur lors de la génération des écritures comptables",
+        variant: "destructive",
+      });
+    }
+    
     setShowAddForm(false);
     
     toast({
       title: "Transaction créée",
-      description: "La transaction a été créée avec succès",
+      description: "La transaction et ses écritures comptables ont été créées avec succès",
     });
   }, [validateTransaction, toast, updateBalanceAfterTransaction]);
 

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, AlertTriangle } from "lucide-react";
 import { useTransactionState } from "@/hooks/useTransactionState";
 import { useTransactionFilters } from "@/hooks/useTransactionFilters";
+import { TransactionDialogs } from "@/components/transactions/TransactionDialogs";
 
 export default function TransactionsPage() {
   const {
@@ -74,7 +75,7 @@ export default function TransactionsPage() {
         <TabsContent value="cancellation">
           <Card className="p-6">
             <div className="mb-4">
-              <h2 className="text-xl font-semibent mb-2">Annulation de transactions</h2>
+              <h2 className="text-xl font-semibold mb-2">Annulation de transactions</h2>
               <p className="text-gray-600">
                 Annulation sécurisée des transactions avec validation des permissions
               </p>
@@ -83,6 +84,14 @@ export default function TransactionsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <TransactionDialogs
+        selectedTransaction={selectedTransaction}
+        showAddForm={showAddForm}
+        onCloseDetailDialog={handleCloseDetailDialog}
+        onAddTransaction={handleAddTransaction}
+        onCloseAddForm={handleCloseAddForm}
+      />
     </div>
   );
 }

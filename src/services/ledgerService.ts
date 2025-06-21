@@ -14,6 +14,24 @@ const LEDGER_ACCOUNTS: LedgerAccount[] = [
 ];
 
 export class LedgerService {
+  private static ledgerEntries: LedgerEntry[] = [];
+
+  /**
+   * Génère automatiquement les écritures comptables pour une transaction
+   * Cette méthode est appelée automatiquement lors de la création d'une transaction
+   */
+  static autoGenerateLedgerEntries(transaction: Transaction): LedgerEntry[] {
+    console.log('Auto-generating ledger entries for transaction:', transaction.id);
+    
+    const entries = this.createLedgerEntriesFromTransaction(transaction);
+    
+    // Ajouter les écritures au registre global
+    this.ledgerEntries.push(...entries);
+    
+    console.log('Ledger entries auto-generated:', entries.length);
+    return entries;
+  }
+
   static createLedgerEntriesFromTransaction(transaction: Transaction): LedgerEntry[] {
     const entries: LedgerEntry[] = [];
     const baseId = `ledger_${transaction.id}`;
@@ -100,6 +118,44 @@ export class LedgerService {
     }
 
     return entries;
+  }
+
+  /**
+   * Génère les écritures d'annulation UNIQUEMENT si une opération d'annulation validée est effectuée
+   */
+  static createReversalEntriesForValidatedCancellation(
+    originalTransactionId: string, 
+    reversalTransactionId: string
+  ): LedgerEntry[] {
+    console.log('Creating reversal entries for validated cancellation:', { originalTransactionId, reversalTransactionId });
+    
+    const originalEntries = this.ledgerEntries.filter(
+      entry => entry.transactionId === originalTransactionId && !entry.isReversalEntry
+    );
+
+    if (originalEntries.length === 0) {
+      console.warn('No original entries found for transaction:', originalTransactionId);
+      return [];
+    }
+
+    const reversalEntries = originalEntries.map(entry => ({
+      ...entry,
+      id: `reversal_${entry.id}`,
+      transactionId: reversalTransactionId,
+      entryDate: new Date(),
+      debitAmount: entry.creditAmount, // Inverser débit/crédit
+      creditAmount: entry.debitAmount,
+      balance: -entry.balance, // Inverser le solde
+      description: `ANNULATION VALIDÉE - ${entry.description}`,
+      isReversalEntry: true,
+      originalEntryId: entry.id
+    }));
+
+    // Ajouter les écritures d'annulation au registre
+    this.ledgerEntries.push(...reversalEntries);
+    
+    console.log('Reversal entries created for validated cancellation:', reversalEntries.length);
+    return reversalEntries;
   }
 
   static createReversalEntries(originalEntries: LedgerEntry[], reversalTransactionId: string): LedgerEntry[] {
@@ -198,5 +254,19 @@ export class LedgerService {
 
   static getLedgerAccounts(): LedgerAccount[] {
     return LEDGER_ACCOUNTS.filter(account => account.isActive);
+  }
+
+  /**
+   * Récupère toutes les écritures comptables
+   */
+  static getAllLedgerEntries(): LedgerEntry[] {
+    return [...this.ledgerEntries];
+  }
+
+  /**
+   * Récupère les écritures pour une transaction spécifique
+   */
+  static getLedgerEntriesForTransaction(transactionId: string): LedgerEntry[] {
+    return this.ledgerEntries.filter(entry => entry.transactionId === transactionId);
   }
 }

@@ -1,6 +1,7 @@
 
 import { Transaction } from "@/types/transaction";
 import { TransactionCancellation, ReversalTransaction } from "@/types/transactionCancellation";
+import { LedgerService } from "./ledgerService";
 
 export class TransactionCancellationService {
   
@@ -157,6 +158,61 @@ export class TransactionCancellationService {
       receiver: originalTransaction.sender,
       validationType: 'none'
     };
+  }
+
+  /**
+   * Valide et finalise une annulation de transaction
+   * Génère automatiquement les écritures d'annulation dans le ledger
+   */
+  static validateAndFinalizeTransactionCancellation(
+    originalTransactionId: string,
+    reversalTransactionId: string,
+    cancelledBy: string,
+    cancelledByName: string,
+    reason: string
+  ): { success: boolean; cancellationRecord?: TransactionCancellation; error?: string } {
+    
+    try {
+      // Créer l'enregistrement d'annulation
+      const cancellationRecord = this.createCancellationRecord(
+        originalTransactionId,
+        reversalTransactionId,
+        cancelledBy,
+        cancelledByName,
+        reason
+      );
+
+      if (!cancellationRecord) {
+        return { success: false, error: "Impossible de créer l'enregistrement d'annulation" };
+      }
+
+      // Générer automatiquement les écritures d'annulation dans le ledger
+      console.log('Génération des écritures d\'annulation pour transaction validée:', originalTransactionId);
+      
+      try {
+        const reversalEntries = LedgerService.createReversalEntriesForValidatedCancellation(
+          originalTransactionId,
+          reversalTransactionId
+        );
+        
+        console.log('Écritures d\'annulation générées:', reversalEntries.length);
+        
+        return { 
+          success: true, 
+          cancellationRecord 
+        };
+      } catch (ledgerError) {
+        console.error('Erreur lors de la génération des écritures d\'annulation:', ledgerError);
+        return { 
+          success: false, 
+          error: "Annulation créée mais erreur dans la génération des écritures comptables" 
+        };
+      }
+      
+    } catch (error) {
+      console.error('Erreur lors de la validation et finalisation de l\'annulation:', error);
+      return { success: false, error: "Erreur lors de la finalisation de l'annulation" };
+    }
   }
 
   /**
